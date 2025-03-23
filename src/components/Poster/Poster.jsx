@@ -1,4 +1,4 @@
-import "./poster.scss"
+import "./poster.scss";
 import { motion } from "framer-motion";
 import { posterFadeInVariants } from "../../motionUtils";
 import { BASE_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
@@ -7,35 +7,47 @@ import useGenreConversion from "../../hooks/useGenreConversion";
 import { showModalDetail } from "../../redux/modal/modal.actions";
 import { useDispatch } from "react-redux";
 import { addToFavourites, removeFromFavourites } from "../../redux/favourites/favourites.actions";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-const Poster = result => {
-    const { item, item: { title, original_name, original_title, name, genre_ids, backdrop_path }, isFavourite } = result;
+const Poster = ({ item, isFavourite }) => {
+    const history = useHistory();
+    const { title, original_name, original_title, name, genre_ids, backdrop_path, id, media_type } = item;
     let fallbackTitle = title || original_title || name || original_name;
     const genresConverted = useGenreConversion(genre_ids);
     const dispatch = useDispatch();
 
-    const handleAdd = event => {
+    // Determine if the item is a TV series based on `media_type`
+    const isTv = media_type === "tv";
+
+    const handleAdd = (event) => {
         event.stopPropagation();
         dispatch(addToFavourites({ ...item, isFavourite }));
     };
-    const handleRemove = event => {
+
+    const handleRemove = (event) => {
         event.stopPropagation();
         dispatch(removeFromFavourites({ ...item, isFavourite }));
     };
 
     const handleModalOpening = () => {
+        console.log("Movie ID in Poster:", id); // Debugging
+        console.log("Is TV:", isTv); // Debugging
+        console.log("Media Type:", media_type); // Debugging
         dispatch(showModalDetail({ ...item, fallbackTitle, genresConverted, isFavourite }));
-    }
+    };
 
-    const handlePlayAction = event => {
+    const handlePlayAction = (event) => {
         event.stopPropagation();
+        history.push({
+            pathname: "/play",
+            state: { id, isTv }, // Pass the ID and isTv flag
+        });
     };
 
     return (
         <motion.div
             variants={posterFadeInVariants}
-            className='Poster'
+            className="Poster"
             onClick={handleModalOpening}
         >
             {backdrop_path ? (
@@ -43,45 +55,45 @@ const Poster = result => {
             ) : (
                 <>
                     <img src={FALLBACK_IMG_URL} alt={fallbackTitle} />
-                    <div className='Poster__fallback'>
+                    <div className="Poster__fallback">
                         <span>{fallbackTitle}</span>
                     </div>
                 </>
             )}
             <div className="Poster__info">
                 <div className="Poster__info--iconswrp">
-                    <Link
+                    <button
                         className="Poster__info--icon icon--play"
-                        onClick={handlePlayAction}
-                        to={'/play'}
+                        onClick={handlePlayAction} // Use onClick for play action
                     >
                         <FaPlay />
-                    </Link>
-                    {!isFavourite
-                        ? (
-                            <button className='Poster__info--icon icon--favourite' onClick={handleAdd}>
-                                <FaPlus />
-                            </button>
-                        ): (
-                            <button className='Poster__info--icon icon--favourite' onClick={handleRemove}>
-                                <FaMinus />
-                            </button>
-                        )}
-                    <button className='Poster__info--icon icon--toggleModal'>
-                        <FaChevronDown onClick={handleModalOpening}/>
+                    </button>
+                    {!isFavourite ? (
+                        <button className="Poster__info--icon icon--favourite" onClick={handleAdd}>
+                            <FaPlus />
+                        </button>
+                    ) : (
+                        <button className="Poster__info--icon icon--favourite" onClick={handleRemove}>
+                            <FaMinus />
+                        </button>
+                    )}
+                    <button className="Poster__info--icon icon--toggleModal" onClick={handleModalOpening}>
+                        <FaChevronDown />
                     </button>
                 </div>
                 <div className="Poster__info--title">
                     <h3>{fallbackTitle}</h3>
                 </div>
                 <div className="Poster__info--genres">
-                    {genresConverted && genresConverted.map(genre => (
-                        <span key={`Genre--id_${genre}`} className="genre-title">{genre}</span>
+                    {genresConverted && genresConverted.map((genre) => (
+                        <span key={`Genre--id_${genre}`} className="genre-title">
+                            {genre}
+                        </span>
                     ))}
                 </div>
             </div>
         </motion.div>
-    )
-}
+    );
+};
 
-export default Poster
+export default Poster;

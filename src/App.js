@@ -17,6 +17,7 @@ import PlayAnimation from "./components/PlayAnimation/PlayAnimation";
 import { selectCurrentUser } from './redux/auth/auth.selectors';
 import { selectSearchResults } from "./redux/search/search.selectors";
 import { checkUserSession } from "./redux/auth/auth.actions";
+import PlayMovie from "./components/PlayMovie/PlayMovie";
 
 const App = () => {
 
@@ -50,8 +51,12 @@ const App = () => {
                         component={SplashAnimation}
                     />
                     <Route
-                        path="/play"
+                        path="/play"            
                         component={PlayAnimation}
+                    />
+                    <Route
+                        path="/PlayMovie"            
+                        component={PlayMovie}
                     />
                     <Route
                         path="/search"
