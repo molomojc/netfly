@@ -11,8 +11,8 @@ const PlayMovie = () => {
 
     // Construct the VidSrc URL based on whether it's a TV series or a movie
     const vidSrcUrl = isTv
-        ? `https://vidsrc.to/embed/tv/${id}`
-        : `https://vidsrc.to/embed/movie/${id}`;
+        ? `https://vidsrc.cc/v2/embed/tv/1399${id}`
+        : `https://vidsrc.cc/v2/embed/movie/${id}`;
 
     return (
         <div className="PlayMovie__wrp">
