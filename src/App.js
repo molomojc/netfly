@@ -19,6 +19,7 @@ import { selectSearchResults } from "./redux/search/search.selectors";
 import { checkUserSession } from "./redux/auth/auth.actions";
 import PlayMovie from "./components/PlayMovie/PlayMovie";
 
+
 const App = () => {
 
     const currentUser = useSelector(selectCurrentUser);
@@ -29,7 +30,7 @@ const App = () => {
     useEffect(() => {
         dispatch(checkUserSession());
     }, [dispatch])
-
+     
     return (
         <div className="App">
             {currentUser && (
