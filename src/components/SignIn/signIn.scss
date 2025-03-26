@@ -99,5 +99,36 @@
       }
 
     }
+    .verification-error-message {
+      color: #ff4d4f;
+      background: #fff2f0;
+      padding: 8px 15px;
+      border-radius: 4px;
+      border: 1px solid #ffccc7;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 14px;
+
+      .resend-button {
+        margin-top: 8px;
+        background: transparent;
+        border: 1px solid #ff4d4f;
+        color: #ff4d4f;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+        
+        &:hover {
+            background: #ff4d4f;
+            color: white;
+        }
+        
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+  }
   }
 }

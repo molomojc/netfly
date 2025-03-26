@@ -58,11 +58,35 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     return userRef;
 };
 
+/*
 export const getCurrentUser = () => {
     return new Promise((resolve, reject) => {
         const unsubscribe = auth.onAuthStateChanged((userAuth) => {
             unsubscribe();
             resolve(userAuth);
+        }, reject);
+    });
+};
+*/
+export const getCurrentUser = () => {
+    return new Promise((resolve, reject) => {
+        const unsubscribe = auth.onAuthStateChanged(async (userAuth) => {
+            unsubscribe();
+            
+            if (userAuth) {
+                // Check if this is an email/password user that isn't verified
+                const isEmailUser = userAuth.providerData.some(
+                    provider => provider.providerId === 'password'
+                );
+                
+                if (isEmailUser && !userAuth.emailVerified) {
+                    await auth.signOut();
+                    resolve(null); // Return null for unverified users
+                    return;
+                }
+            }
+            
+            resolve(userAuth); // Return user for verified users/social logins
         }, reject);
     });
 };

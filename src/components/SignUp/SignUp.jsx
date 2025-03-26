@@ -7,9 +7,11 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { signUpStart } from "../../redux/auth/auth.actions";
 import { selectAuthLoadingState } from "../../redux/auth/auth.selectors";
+import { useHistory } from "react-router-dom";
 
 const SignUp = () => {
 	const dispatch = useDispatch();
+	const history = useHistory();
 	const isLoading = useSelector(selectAuthLoadingState);
 	const { register, handleSubmit, errors, getValues } = useForm({
 		mode: "onTouched"
@@ -18,6 +20,7 @@ const SignUp = () => {
 	const onSubmit = data => {
 		const { displayName, email, password } = data;
 		dispatch(signUpStart({ displayName, email, password }));
+		history.push('/verify-email');
 	}
 
 	return (
