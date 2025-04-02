@@ -1,5 +1,5 @@
 import './detailModal.scss';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react'; // Add useCallback
 import { useHistory } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { staggerOne, modalOverlayVariants, modalVariants, modalFadeInUpVariants } from "../../motionUtils";
@@ -22,27 +22,20 @@ const DetailModal = () => {
     const [loadingTrailer, setLoadingTrailer] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (!modalClosed && modalContent) {
-            fetchTrailer();
-        }
-    }, [modalClosed, modalContent]);
-
-    const fetchTrailer = async () => {
+   
+    const fetchTrailer = useCallback(async () => {
         if (!modalContent?.id || !modalContent?.media_type) return;
         
         setLoadingTrailer(true);
         setError(null);
         
         try {
-            // This would call your API to get trailer URLs
             const url = await fetchTrailerUrl(modalContent.id, modalContent.media_type);
-           
             if (url) {
                 setTrailerUrl(url);
-                console.log("Trailer URL:", url); // Debugging
+                console.log("Trailer URL:", url);
             } else {
-               console.log("No trailer found for this content."); // Debugging
+                console.log("No trailer found for this content.");
                 setError('No trailer available');
             }
         } catch (err) {
@@ -51,7 +44,13 @@ const DetailModal = () => {
         } finally {
             setLoadingTrailer(false);
         }
-    };
+    }, [modalContent]); // Add dependencies here
+
+    useEffect(() => {
+        if (!modalClosed && modalContent) {
+            fetchTrailer();
+        }
+    }, [modalClosed, modalContent, fetchTrailer]); 
 
     const handleModalClose = () => {
         setTrailerUrl(null); // Reset trailer when closing
