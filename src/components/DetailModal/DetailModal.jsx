@@ -1,12 +1,12 @@
 import './detailModal.scss';
-import { useRef } from 'react';
-import { useHistory } from "react-router-dom"; // Add useHistory
+import { useRef, useState, useEffect } from 'react';
+import { useHistory } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { staggerOne, modalOverlayVariants, modalVariants, modalFadeInUpVariants } from "../../motionUtils";
 import { hideModalDetail } from "../../redux/modal/modal.actions";
 import { useDispatch, useSelector } from "react-redux";
 import { selectModalContent, selectModalState } from "../../redux/modal/modal.selectors";
-import { BASE_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
+import { BASE_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
 import { VscChromeClose } from "react-icons/vsc";
 import { capitalizeFirstLetter, dateToYearOnly } from "../../utils";
 import { FaMinus, FaPlay, FaPlus } from "react-icons/fa";
@@ -15,13 +15,46 @@ import useOutsideClick from "../../hooks/useOutsideClick";
 
 const DetailModal = () => {
     const dispatch = useDispatch();
-    const history = useHistory(); // Add useHistory
+    const history = useHistory();
     const modalClosed = useSelector(selectModalState);
     const modalContent = useSelector(selectModalContent);
-    console.log("Modal Content:", modalContent); // Debugging
+    const [trailerUrl, setTrailerUrl] = useState(null);
+    const [loadingTrailer, setLoadingTrailer] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (!modalClosed && modalContent) {
+            fetchTrailer();
+        }
+    }, [modalClosed, modalContent]);
+
+    const fetchTrailer = async () => {
+        if (!modalContent?.id || !modalContent?.media_type) return;
+        
+        setLoadingTrailer(true);
+        setError(null);
+        
+        try {
+            // This would call your API to get trailer URLs
+            const url = await fetchTrailerUrl(modalContent.id, modalContent.media_type);
+           
+            if (url) {
+                setTrailerUrl(url);
+                console.log("Trailer URL:", url); // Debugging
+            } else {
+               console.log("No trailer found for this content."); // Debugging
+                setError('No trailer available');
+            }
+        } catch (err) {
+            setError('Failed to load trailer');
+            console.error("Error fetching trailer:", err);
+        } finally {
+            setLoadingTrailer(false);
+        }
+    };
 
     const handleModalClose = () => {
-        console.log("Modal closed"); // Debugging
+        setTrailerUrl(null); // Reset trailer when closing
         dispatch(hideModalDetail());
     };
 
@@ -31,33 +64,26 @@ const DetailModal = () => {
     const reducedDate = release_date ? dateToYearOnly(release_date) : first_air_date ? dateToYearOnly(first_air_date) : "Not Available";
     const modalRef = useRef();
 
-	const mediaType = media_type || (first_air_date ? "tv" : "movie");
-	const isTv = mediaType === "tv"; // Use mediaType to determine isTv
+    const mediaType = media_type || (first_air_date ? "tv" : "movie");
+    const isTv = mediaType === "tv";
 
     const handleAdd = (event) => {
         event.stopPropagation();
-        console.log("Add to Favourites clicked"); // Debugging
         dispatch(addToFavourites({ ...modalContent, isFavourite }));
     };
 
     const handleRemove = (event) => {
         event.stopPropagation();
-        console.log("Remove from Favourites clicked"); // Debugging
         dispatch(removeFromFavourites({ ...modalContent, isFavourite }));
         if (!modalClosed) handleModalClose();
     };
 
     const handlePlayAnimation = (event) => {
         event.stopPropagation();
-        console.log("Play button clicked"); // Debugging
-        console.log("ID from detailed:", id); // Debugging
-        console.log("Is TV: from detailed", isTv); // Debugging
-		console.log("Media Type:", mediaType); // Debugging
         handleModalClose();
-        // Navigate to /play with the ID and isTv flag
         history.push({
             pathname: "/play",
-            state: { id, isTv }, // Pass the ID and isTv flag
+            state: { id, isTv },
         });
     };
 
@@ -68,86 +94,117 @@ const DetailModal = () => {
     return (
         <AnimatePresence exitBeforeEnter>
             {!modalClosed && (
-                <>
-                    {console.log("DetailModal is rendering")} {/* Debugging */}
+                <motion.div
+                    variants={modalOverlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    key="modalOverlay"
+                    className={`Modal__overlay ${modalClosed && 'Modal__invisible'}`}
+                >
                     <motion.div
-                        variants={modalOverlayVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        key="modalOverlay"
-                        className={`Modal__overlay ${modalClosed && 'Modal__invisible'}`}
+                        key="modal"
+                        variants={modalVariants}
+                        ref={modalRef}
+                        className={`Modal__wrp ${modalClosed && 'Modal__invisible'}`}
                     >
-                        <motion.div
-                            key="modal"
-                            variants={modalVariants}
-                            ref={modalRef}
-                            className={`Modal__wrp ${modalClosed && 'Modal__invisible'}`}
+                        <motion.button
+                            className="Modal__closebtn"
+                            onClick={handleModalClose}
                         >
-                            <motion.button
-                                className="Modal__closebtn"
-                                onClick={handleModalClose}
-                            >
-                                <VscChromeClose />
-                            </motion.button>
-                            <div className="Modal__image--wrp">
-                                <div className="Modal__image--shadow" />
+                            <VscChromeClose />
+                        </motion.button>
+                        <div className="Modal__image--wrp">
+                            <div className="Modal__image--shadow" />
+                            
+                            {/* Trailer or fallback content */}
+                            {loadingTrailer ? (
+                                <div className="Modal__trailer--loading">
+                                    Loading trailer...
+                                </div>
+                            ) : trailerUrl ? (
+                                <div className="Modal__trailer--container">
+                                    <iframe
+                                        src={trailerUrl}
+                                        title={`${fallbackTitle} Trailer`}
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        className="Modal__trailer--iframe"
+                                        width="100%"
+                                       
+                                        loading="lazy"
+                                        style={{ border: 'none', height: 'calc(100vh - 50px)' }}
+                                    />
+                                </div>
+                            ) : error ? (
+                                <div className="Modal__trailer--error">
+                                    <img
+                                        className="Modal__image--img"
+                                        src={backdrop_path ? `${BASE_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
+                                        alt={fallbackTitle}
+                                    />
+                                    <div className="Modal__trailer--error-message">
+                                        {error}
+                                    </div>
+                                </div>
+                            ) : (
                                 <img
                                     className="Modal__image--img"
                                     src={backdrop_path ? `${BASE_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
                                     alt={fallbackTitle}
                                 />
-                                <div className="Modal__image--buttonswrp">
-                                    <button
-                                        className="Modal__image--button"
-                                        onClick={handlePlayAnimation} // Use onClick for play action
-                                    >
-                                        <FaPlay />
-                                        <span>Play</span>
+                            )}
+                            
+                            <div className="Modal__image--buttonswrp">
+                                <button
+                                    className="Modal__image--button"
+                                    onClick={handlePlayAnimation}
+                                >
+                                    <FaPlay />
+                                    <span>Play</span>
+                                </button>
+                                {!isFavourite ? (
+                                    <button className='Modal__image--button-circular' onClick={handleAdd}>
+                                        <FaPlus />
                                     </button>
-                                    {!isFavourite
-                                        ? (
-                                            <button className='Modal__image--button-circular' onClick={handleAdd}>
-                                                <FaPlus />
-                                            </button>
-                                        ) : (
-                                            <button className='Modal__image--button-circular' onClick={handleRemove}>
-                                                <FaMinus />
-                                            </button>
-                                        )}
-                                </div>
+                                ) : (
+                                    <button className='Modal__image--button-circular' onClick={handleRemove}>
+                                        <FaMinus />
+                                    </button>
+                                )}
                             </div>
-                            <motion.div variants={staggerOne} initial="initial" animate="animate" exit="exit" className="Modal__info--wrp">
-                                <motion.h3 variants={modalFadeInUpVariants} className="Modal__info--title">{fallbackTitle}</motion.h3>
-                                <motion.p variants={modalFadeInUpVariants} className="Modal__info--description">{overview}</motion.p>
-                                <motion.hr variants={modalFadeInUpVariants} className="Modal__info--line"/>
-                                <motion.h4 variants={modalFadeInUpVariants} className="Modal__info--otherTitle">Info on <b>{fallbackTitle}</b></motion.h4>
-                                <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
-                                    <span className='Modal__info--row-label'>Genres: </span>
-                                    <span className="Modal__info--row-description">{joinedGenres}</span>
-                                </motion.div>
-                                <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
-                                    <span className='Modal__info--row-label'>
-                                        {release_date ? "Release date: " : "First air date: "}
-                                    </span>
-                                    <span className="Modal__info--row-description">{reducedDate}</span>
-                                </motion.div>
-                                <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
-                                    <span className='Modal__info--row-label'>Average vote: </span>
-                                    <span className="Modal__info--row-description">{vote_average || "Not available"}</span>
-                                </motion.div>
-                                <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
-                                    <span className='Modal__info--row-label'>Original language: </span>
-                                    <span className="Modal__info--row-description">{capitalizeFirstLetter(original_language)}</span>
-                                </motion.div>
-                                <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
-                                    <span className='Modal__info--row-label'>Age classification: </span>
-                                    <span className="Modal__info--row-description">{maturityRating}</span>
-                                </motion.div>
+                        </div>
+                        <motion.div variants={staggerOne} initial="initial" animate="animate" exit="exit" className="Modal__info--wrp">
+                            <motion.h3 variants={modalFadeInUpVariants} className="Modal__info--title">{fallbackTitle}</motion.h3>
+                            <motion.p variants={modalFadeInUpVariants} className="Modal__info--description">{overview}</motion.p>
+                            <motion.hr variants={modalFadeInUpVariants} className="Modal__info--line"/>
+                            <motion.h4 variants={modalFadeInUpVariants} className="Modal__info--otherTitle">Info on <b>{fallbackTitle}</b></motion.h4>
+                            <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
+                                <span className='Modal__info--row-label'>Genres: </span>
+                                <span className="Modal__info--row-description">{joinedGenres}</span>
+                            </motion.div>
+                            <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
+                                <span className='Modal__info--row-label'>
+                                    {release_date ? "Release date: " : "First air date: "}
+                                </span>
+                                <span className="Modal__info--row-description">{reducedDate}</span>
+                            </motion.div>
+                            <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
+                                <span className='Modal__info--row-label'>Average vote: </span>
+                                <span className="Modal__info--row-description">{vote_average || "Not available"}</span>
+                            </motion.div>
+                            <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
+                                <span className='Modal__info--row-label'>Original language: </span>
+                                <span className="Modal__info--row-description">{capitalizeFirstLetter(original_language)}</span>
+                            </motion.div>
+                            <motion.div variants={modalFadeInUpVariants} className="Modal__info--row">
+                                <span className='Modal__info--row-label'>Age classification: </span>
+                                <span className="Modal__info--row-description">{maturityRating}</span>
                             </motion.div>
                         </motion.div>
                     </motion.div>
-                </>
+                </motion.div>
             )}
         </AnimatePresence>
     );

@@ -14,7 +14,16 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
     const dispatch = useDispatch();
     const history = useHistory(); // Add useHistory
 
-    //const mediaType = media_type || (first_air_date ? "tv" : "movie");
+    const getMediaType = () => {
+        if (item.original_name || item.name) return 'tv';
+        if (item.original_title || item.title) return 'movie';
+        return item.first_air_date ? 'tv' : 'movie';
+      };
+    
+      const mediaType = getMediaType();
+   //   const isTvv = mediaType === 'tv';
+    //  const dateToShow = isTv ? item.first_air_date : item.release_date;
+   
 	const isTv = media_type === "tv"; // Use mediaType to determine isTv
 
     const handleAdd = (event) => {
@@ -28,15 +37,21 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
     };
 
     const handleModalOpening = () => {
-        dispatch(showModalDetail({ ...item, fallbackTitle, genresConverted, isFavourite }));
+        console.log("Movie ID in Row:", id);
+        console.log("isTv:", isTv);
+        console.log("Media Type:", mediaType);
+        dispatch(showModalDetail({ 
+            ...item, 
+            fallbackTitle, 
+            genresConverted, 
+            isFavourite,
+            media_type: mediaType // Explicitly pass the media_type
+        }));
     };
 
     const handlePlayAction = (event) => {
         event.stopPropagation();
-        // Navigate to the PlayAnimation component with the ID and isTv flag
-		console.log("Movie ID in Row:", id);
-        console.log("isTv:", isTv);
-        console.log("Media Type:", media_type);
+       
     
         history.push({
             pathname: "/play",
@@ -100,4 +115,4 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
     );
 };
 
-export default RowPoster;
+export default RowPoster; 

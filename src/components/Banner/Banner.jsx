@@ -37,10 +37,16 @@ const Banner = ({ type }) => {
     const finalData = results[randomize(results)];
     const fallbackTitle = finalData?.title || finalData?.name || finalData?.original_name;
     const id = finalData?.id;
+    const getMediaType = () => {
+        if (isTv == true) return 'tv';
+        if (isTv == false) return 'movie';
+       
+      };
     const episodeId = finalData?.episode_id;
     const seasonId = finalData?.season_id;
     const description = truncate(finalData?.overview, 150);
     const dispatch = useDispatch();
+     const mediaType = getMediaType();
 
     const handlePlayAnimation = (event) => {
         event.stopPropagation();
@@ -55,7 +61,8 @@ const Banner = ({ type }) => {
 
     const handleModalOpening = () => {
         console.log("Movie ID in Banner:", id);
-        dispatch(showModalDetail({ ...finalData, fallbackTitle }));
+        console.log("Is TV:", mediaType);
+        dispatch(showModalDetail({ ...finalData, fallbackTitle, media_type: mediaType  }));
     };
 
     return (
