@@ -133,6 +133,8 @@ const DetailModal = () => {
 
     const mediaType = media_type || (first_air_date ? "tv" : "movie");
     const isTv = mediaType === "tv";
+    const Season = isTv ? 1 : 0;
+    const Episode = isTv ? 1 : 0;
 
     const handleAdd = (event) => {
         event.stopPropagation();
@@ -150,7 +152,7 @@ const DetailModal = () => {
         handleModalClose();
         history.push({
             pathname: "/Play",
-            state: { id, isTv },
+            state: { id, isTv,Season,Episode }, // Pass the ID and isTv flag
         });
     };
 
@@ -273,7 +275,7 @@ const DetailModal = () => {
                         {isTv && (
     <Episodes 
         tvId={id} 
-        seasonNumber={1}
+        seasonNumber={1} 
     />
 )}
                         {!loadingSimilar && similarContent.length > 0 && (

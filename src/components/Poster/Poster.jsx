@@ -18,6 +18,8 @@ const Poster = ({ item, isFavourite }) => {
 
     // Determine if the item is a TV series based on `media_type`
     const isTv = media_type === "tv";
+    const Season = isTv ? 1 : 0;
+    const Episode = isTv ? 1 : 0;
 
     const handleAdd = (event) => {
         event.stopPropagation();
@@ -36,11 +38,14 @@ const Poster = ({ item, isFavourite }) => {
         dispatch(showModalDetail({ ...item, fallbackTitle, genresConverted, isFavourite }));
     };
 
+    
+
+
     const handlePlayAction = (event) => {
         event.stopPropagation();
         history.push({
             pathname: "/play",
-            state: { id, isTv }, // Pass the ID and isTv flag
+            state: { id, isTv,Season,Episode }, // Pass the ID and isTv flag
         });
     };
 

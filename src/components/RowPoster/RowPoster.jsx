@@ -25,6 +25,8 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
     //  const dateToShow = isTv ? item.first_air_date : item.release_date;
    
 	const isTv = media_type === "tv"; // Use mediaType to determine isTv
+    const Season = isTv ? 1 : 0;
+    const Episode = isTv ? 1 : 0;
 
     const handleAdd = (event) => {
         event.stopPropagation();
@@ -48,14 +50,20 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
             media_type: mediaType // Explicitly pass the media_type
         }));
     };
-
+     
+  
+    
+  
     const handlePlayAction = (event) => {
         event.stopPropagation();
        
-    
+        console.log("Movie ID in Row:", id); // Debugging
+        console.log("Is TV:", isTv); // Debugging   
+        console.log("Season:", Season); // Debugging
+        console.log("Episode:", Episode); // Debugging
         history.push({
             pathname: "/play",
-            state: { id, isTv }, // Pass the ID and isTv flag
+            state: { id, isTv, Season, Episode}, // Pass the ID and isTv flag
         });
     };
 
