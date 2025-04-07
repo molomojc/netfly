@@ -1,4 +1,5 @@
 .PlayMovie__wrp {
+    
     .server-buttons {
         display: flex;
         gap: 10px;
@@ -21,8 +22,21 @@
     }
 
     .server-buttons button.active {
-        background: #4CAF50;
+        background: #de3d3d;
     }
+    .next-episode-button {
+        margin-left: auto; // Pushes to far right
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--netflix-red);
+        padding: 8px 25px;
+
+        &:hover {
+            background: darken(#e50914, 10%);
+        }
+    }
+
 
    
 }
