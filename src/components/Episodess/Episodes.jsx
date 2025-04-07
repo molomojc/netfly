@@ -79,7 +79,10 @@ const Episodes = ({ tvId, seasonNumber }) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
         >
-            <h3 className="episodes-title">Episodes: Season {seasonNumber}</h3>
+        
+<p className="season-info">
+    Season {seasonNumber} • {episodes.length} episodes
+</p>
             <div className="episodes-list">
                 {episodes.map((episode) => (
                     <div key={episode.id} className="episode-row">

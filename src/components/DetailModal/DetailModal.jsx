@@ -28,6 +28,8 @@ const DetailModal = () => {
     const [error, setError] = useState(null);
     const [similarContent, setSimilarContent] = useState([]);
     const [loadingSimilar, setLoadingSimilar] = useState(false);
+    const [selectedSeason, setSelectedSeason] = useState(1);
+    const [totalSeasons, setTotalSeasons] = useState(1);
 
    
     const fetchTrailer = useCallback(async () => {
@@ -104,7 +106,7 @@ const DetailModal = () => {
         setError(null);
         
         // Fetch fresh data
-        const fetchData = async () => {
+        const fetchData = async () => {  
             try {
                 await Promise.all([
                     fetchTrailer(),
@@ -114,6 +116,19 @@ const DetailModal = () => {
                 console.error("Error fetching modal data:", err);
             }
         };
+
+        const fetchShowInfo = async () => {
+            try {
+                const response = await fetch( `https://api.themoviedb.org/3${requests.fetchSeasonNum(modalContent.id)}`
+ );
+                const data = await response.json();
+                setTotalSeasons(data.number_of_seasons || 1);
+            } catch (err) {
+                console.error("Error fetching TV show info:", err);
+            }
+        };
+        
+        fetchShowInfo();
         
         fetchData();
     }
@@ -273,11 +288,29 @@ const DetailModal = () => {
                             </motion.div>
                         </motion.div>
                         {isTv && (
+  <>
+    <div className="Modal__season-selector">
+      <label>Season: </label>
+      <select 
+        className="Modal__season-selector--select"
+        value={selectedSeason} 
+        onChange={(e) => setSelectedSeason(Number(e.target.value))}
+      >
+        {Array.from({ length: totalSeasons }, (_, i) => (
+          <option key={i + 1} value={i + 1}>
+            Season {i + 1}
+          </option>
+        ))}
+      </select>
+    </div>
+
     <Episodes 
-        tvId={id} 
-        seasonNumber={1} 
+      tvId={id} 
+      seasonNumber={selectedSeason} 
     />
+  </>
 )}
+
                         {!loadingSimilar && similarContent.length > 0 && (
     <SimilarContent 
         similarItems={similarContent} 
