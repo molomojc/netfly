@@ -4,17 +4,18 @@ import { useLocation } from "react-router-dom";
 
 const PlayMovie = () => {
     const location = useLocation();
-    const { id, isTv } = location.state;
+    const { id, isTv, Season, Episode} = location.state || {};
     const [currentServer, setCurrentServer] = useState(1); // Default: Server 1
-
-    // Available servers (1-3)
+ console.log("Season Number", Season);
+    console.log("Episode Number", Episode);
+   
     const servers = {
-        1: isTv ? `https://vidsrc.cc/v2/embed/tv/${id}` 
+        1: isTv ? `https://vidsrc.cc/v2/embed/tv/${id}/${Season}/${Episode}` 
                : `https://vidsrc.cc/v2/embed/movie/${id}`,
-        2: isTv ? `https://vidsrc.xyz/embed/tv/${id}` 
+        2: isTv ? `https://vidsrc.xyz/embed/tv/${id}/${Season}-${Episode}` 
                : `https://vidsrc.xyz/embed/movie/${id}`,
-        3: isTv ? `https://vidsrc.to/embed/tv/${id}` 
-               : `https://vidsrc.to/embed/movie/${id}`
+        3: isTv ? `https://www.2embed.cc/embedtv/${id}&s=${Season}&e=${Episode}` 
+               : `https://www.2embed.cc/embed/${id}`
     };
 
     return (

@@ -1,0 +1,121 @@
+.episodes-container {
+    padding: 20px;
+    margin-top: 30px;
+    color: white;
+    
+    .episodes-title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .episodes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .episode-row {
+        display: flex;
+        gap: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateY(-3px);
+        }
+    }
+    
+    .episode-image-container {
+        position: relative;
+        min-width: 300px;
+        height: 170px;
+        
+        .episode-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .episode-play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            
+            svg {
+                color: white;
+                font-size: 1.2rem;
+            }
+            
+            &:hover {
+                background: var(--netflix-red);
+                border-color: var(--netflix-red);
+            }
+        }
+        
+        &:hover .episode-play-button {
+            opacity: 1;
+        }
+    }
+    
+    .episode-info {
+        padding: 15px;
+        flex-grow: 1;
+        
+        .episode-name {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .episode-airdate {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        
+        .episode-overview {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #ddd;
+        }
+    }
+}
+
+.episodes-loading, .episodes-error {
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.episodes-error {
+    color: var(--netflix-red);
+}
+
+@media (max-width: 768px) {
+    .episode-row {
+        flex-direction: column;
+    }
+    
+    .episode-image-container {
+        min-width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16/9;
+    }
+}

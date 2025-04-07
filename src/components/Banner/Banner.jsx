@@ -48,6 +48,13 @@ const Banner = ({ type }) => {
     const dispatch = useDispatch();
      const mediaType = getMediaType();
 
+     let Season = 0;
+     let Episode = 0;
+     if (isTv) {    
+        Season = 1;
+        Episode = 1;
+     }
+
     const handlePlayAnimation = (event) => {
         event.stopPropagation();
         console.log("Movie ID in Banner:", id);
@@ -55,7 +62,7 @@ const Banner = ({ type }) => {
         console.log("Season ID in Banner:", seasonId);
         history.push({
             pathname: '/play',
-            state: { id, isTv }, // Pass the ID and the flag
+            state: { id, isTv,Season,Episode}, // Pass the ID and the flag
         });
     };
 

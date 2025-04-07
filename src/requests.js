@@ -80,6 +80,10 @@ const requests = {
     // Video endpoints
     fetchMovieVideos: (movieId) => `/movie/${movieId}/videos?api_key=${REACT_APP_TMDB_API_KEY}&language=${LANG}`,
     fetchTVVideos: (tvId) => `/tv/${tvId}/videos?api_key=${REACT_APP_TMDB_API_KEY}&language=${LANG}`,
+
+  
+   fetchTVEpisodes: (tvId, seasonNumber) => `/tv/${tvId}/season/${seasonNumber}?api_key=${REACT_APP_TMDB_API_KEY}&language=${LANG}`,
+   fetchSimilar: (id, mediaType) => `/${mediaType}/${id}/similar?api_key=${REACT_APP_TMDB_API_KEY}&language=${LANG}&page=1&sort_by=popularity.desc&vote_count.gte=50`,
 };
 
 export default requests;

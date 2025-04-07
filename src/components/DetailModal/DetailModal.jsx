@@ -13,6 +13,11 @@ import { FaMinus, FaPlay, FaPlus } from "react-icons/fa";
 import { addToFavourites, removeFromFavourites } from "../../redux/favourites/favourites.actions";
 import useOutsideClick from "../../hooks/useOutsideClick";
 
+import SimilarContent from "../SimilarContent/SimilarContent";
+import Episodes from '../Episodess/Episodes';
+import requests from "../../requests";
+
+
 const DetailModal = () => {
     const dispatch = useDispatch();
     const history = useHistory();
@@ -21,6 +26,8 @@ const DetailModal = () => {
     const [trailerUrl, setTrailerUrl] = useState(null);
     const [loadingTrailer, setLoadingTrailer] = useState(false);
     const [error, setError] = useState(null);
+    const [similarContent, setSimilarContent] = useState([]);
+    const [loadingSimilar, setLoadingSimilar] = useState(false);
 
    
     const fetchTrailer = useCallback(async () => {
@@ -44,16 +51,77 @@ const DetailModal = () => {
         } finally {
             setLoadingTrailer(false);
         }
-    }, [modalContent]); // Add dependencies here
+    }, [modalContent]); 
 
-    useEffect(() => {
-        if (!modalClosed && modalContent) {
-            fetchTrailer();
+    const fetchSimilarContent = useCallback(async () => {
+        if (!modalContent?.id || !modalContent?.media_type) return;
+        
+        setLoadingSimilar(true);
+        try {
+            const response = await fetch(
+                `https://api.themoviedb.org/3${requests.fetchSimilar(modalContent.id, modalContent.media_type)}`
+            );
+                        
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new TypeError("Response wasn't JSON");
+            }
+    
+            const data = await response.json();
+            if (data.results) {
+                const filteredResults = data.results?.filter(item => {
+                    const releaseYear = item.release_date 
+                        ? new Date(item.release_date).getFullYear() 
+                        : item.first_air_date 
+                            ? new Date(item.first_air_date).getFullYear() 
+                            : 0;
+                            
+                    return (
+                        item.poster_path &&
+                        (item.vote_average || 0) > 5 &&
+                        releaseYear >= 2005
+                    );
+                }).slice(0, 6) || [];
+                
+                setSimilarContent(filteredResults);
+            }
+        } catch (err) {
+            console.error("Error fetching similar content:", err);
+            setSimilarContent([]);
+        } finally {
+            setLoadingSimilar(false);
         }
-    }, [modalClosed, modalContent, fetchTrailer]); 
+    }, [modalContent]);
+
+
+  useEffect(() => {
+    if (!modalClosed && modalContent?.id) {
+        // Reset only the trailer when content changes
+        setTrailerUrl(null);
+        setError(null);
+        
+        // Fetch fresh data
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    fetchTrailer(),
+                    fetchSimilarContent()
+                ]);
+            } catch (err) {
+                console.error("Error fetching modal data:", err);
+            }
+        };
+        
+        fetchData();
+    }
+}, [modalClosed, modalContent?.id, fetchTrailer, fetchSimilarContent]); // Only depend on ID changes
+
 
     const handleModalClose = () => {
-        setTrailerUrl(null); // Reset trailer when closing
+        setTrailerUrl(null); 
         dispatch(hideModalDetail());
     };
 
@@ -81,7 +149,7 @@ const DetailModal = () => {
         event.stopPropagation();
         handleModalClose();
         history.push({
-            pathname: "/play",
+            pathname: "/Play",
             state: { id, isTv },
         });
     };
@@ -202,6 +270,23 @@ const DetailModal = () => {
                                 <span className="Modal__info--row-description">{maturityRating}</span>
                             </motion.div>
                         </motion.div>
+                        {isTv && (
+    <Episodes 
+        tvId={id} 
+        seasonNumber={1}
+    />
+)}
+                        {!loadingSimilar && similarContent.length > 0 && (
+    <SimilarContent 
+        similarItems={similarContent} 
+        mediaType={mediaType} 
+    />
+)}
+{loadingSimilar && (
+    <div className="Modal__loading">
+        Loading similar content...
+    </div>
+)}
                     </motion.div>
                 </motion.div>
             )}
