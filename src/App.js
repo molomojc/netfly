@@ -34,7 +34,7 @@ const update = (
         <br></br>
         <br></br>
         <p> In order to Mitigate the dangerous warning when trying to log in, we will be changing the domain to a proper one with added security </p>
-        <p>To: <a href="https://movie2.netlify.app">The new Link,</a> This will be available after we disable this Domain. So please Save it!</p>
+        <p>To: <a href="https://series2.netlify.app">The new Link,</a> This is Now available</p>
         <p> we will also email you with the new Link</p>
         <br></br>
         <p> Other updates... </p>
