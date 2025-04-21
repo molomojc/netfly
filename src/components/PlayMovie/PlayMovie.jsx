@@ -40,7 +40,7 @@ const PlayMovie = () => {
                     allowFullScreen
                     frameBorder="0"
                     title={`${isTv ? "TV Show" : "Movie"} Player`}
-                    style={{ width: "100%", height: "620px", overflow: "hidden", marginTop: "62px" }}
+                    style={{ width: "100%", height: "640px", overflow: "hidden", marginTop: "62px" }}
                 />
             </div>
 
