@@ -18,14 +18,14 @@ import { selectCurrentUser } from './redux/auth/auth.selectors';
 import { selectSearchResults } from "./redux/search/search.selectors";
 import { checkUserSession } from "./redux/auth/auth.actions";
 import PlayMovie from "./components/PlayMovie/PlayMovie";
-import Notification from "./components/Notification/Notification";
-import React, { useState } from "react";
+//import Notification from "./components/Notification/Notification";
+//import React, { useState } from "react";
 
 
 
 
 
-
+/*
 
 const update = (
     <>
@@ -53,23 +53,33 @@ const update = (
         <p className="update-signoff">ENJOY!!<br /><strong>- Cinema Team</strong></p>
     </>
 )
+    */
+/*
+{showNotification && (
+    <Notification
+        content={update}
+        onClose={() => setShowNotification(false)}
+    />
+)} */
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser);
     const searchResults = useSelector(selectSearchResults);
     const dispatch = useDispatch();
-    const [showNotification, setShowNotification] = useState(true); // Correctly destructure useState
+ //   const [showNotification, setShowNotification] = useState(true); // Correctly destructure useState
 
     const location = useLocation();
 
     useEffect(() => {
         dispatch(checkUserSession());
+      /*
         const timer = setTimeout(() => {
             setShowNotification(true);
         }, 6000); 
+        */
         // eslint-disable-next-line react-hooks/exhaustive-deps
 
-        return () => clearTimeout(timer);
+       // return () => clearTimeout(timer);
     }, [dispatch]);
 
     return (
@@ -78,12 +88,8 @@ const App = () => {
                 <>
                     <Navbar />
                     <DetailModal />
-                    {showNotification && (
-                        <Notification
-                            content={update}
-                            onClose={() => setShowNotification(false)}
-                        />
-                    )}
+
+                    
                 </>
             )}
             <AnimatePresence exitBeforeEnter>
