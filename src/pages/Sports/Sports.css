@@ -1,0 +1,235 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #141414;
+  color: white;
+  overflow: hidden;
+}
+/* Hero section base styles */
+.hero {
+  position: relative;
+  height: 450px;
+  display: flex;
+  align-items: center; /* Vertical centering */
+  background: url("hero.png") center/cover no-repeat;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Hero content - left aligned but vertically centered */
+.hero-content {
+  position: relative;
+  max-width: 600px;
+  padding: 2rem;
+  margin-left: 5%; /* Adjust this for left positioning */
+  color: white;
+  text-align: left; /* Left align text */
+}
+
+/* Title (unchanged from your original) */
+.show-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Genre styling */
+.show-genre {
+  font-size: 1rem;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+/* Description styling */
+.show-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.95;
+  max-width: 90%; /* Slightly narrower for better readability */
+}
+
+.season-selection {
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+  margin-top: 50px;
+}
+
+.season-button {
+  background: #b81d24;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #1c1c1c;
+  min-width: 160px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 5px;
+}
+
+.dropdown-content a {
+  color: white;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  transition: 0.3s;
+}
+
+.dropdown-content a:hover {
+  background-color: #b81d24;
+}
+
+.show {
+  display: block;
+}
+
+.character-gallery {
+  display: flex;
+  overflow: hidden;
+  padding: 10px 5px;
+  position: relative;
+  gap: 10px;
+}
+
+.character img {
+  width: 200px;
+  height: auto;
+  border-radius: 8px;
+  transition: transform 0.3s;
+}
+
+.character img:hover {
+  transform: scale(1.1);
+  background-color: white;
+}
+
+/*start*/
+.swiper {
+  width: 100%;
+  padding: 20px 0;
+}
+
+.swiper-slide {
+  width: auto;
+  transition: transform 0.3s;
+}
+
+/* Navigation Arrows */
+.swiper-button-prev,
+.swiper-button-next {
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  width: 40px;
+  height: 80px;
+  margin-top: -40px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.swiper-button-prev {
+  left: 0;
+}
+
+.swiper-button-next {
+  right: 0;
+}
+
+/* Default state: Buttons are hidden */
+.swiper-button-prev,
+.swiper-button-next {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Show buttons when hovering over .swiper */
+.swiper:hover .swiper-button-prev,
+.swiper:hover .swiper-button-next {
+  opacity: 1;
+}
+
+/* Button Styling */
+.swiper-button-prev,
+.swiper-button-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.3s, opacity 0.3s;
+}
+
+/* Positioning */
+.swiper-button-prev {
+  left: 10px;
+}
+
+.swiper-button-next {
+  right: 10px;
+}
+
+/* Hover Effect */
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/*start*/
+/* Play button styling */
+.play-trailer-btn {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.play-trailer-btn:hover {
+  transform: scale(1.05);
+  background: #f40612;
+}
+
+/* When trailer is active */
+.hero.trailer-active .hero-content {
+  opacity: 0;
+  transform: translateX(-50px);
+  pointer-events: none;
+}
+
+.hero.trailer-active .overlay {
+  opacity: 0;
+}
+
+.hero.trailer-active .trailer-container {
+  opacity: 1;
+  z-index: 3;
+}
+.trailer-container {
+  position: relative;
+  left: -300px;
+}

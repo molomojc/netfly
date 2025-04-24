@@ -1,0 +1,42 @@
+.PlayMovie__wrp {
+    
+    .server-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    .server-buttons button {
+        padding: 8px 16px;
+        background: #555;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .server-buttons button:hover {
+        background: #666;
+    }
+
+    .server-buttons button.active {
+        background: #de3d3d;
+    }
+    .next-episode-button {
+        margin-left: auto; // Pushes to far right
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--netflix-red);
+        padding: 8px 25px;
+
+        &:hover {
+            background: darken(#e50914, 10%);
+        }
+    }
+
+
+   
+}

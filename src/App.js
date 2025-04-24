@@ -14,10 +14,13 @@ import Category from "./pages/Category/Category";
 import DetailModal from "./components/DetailModal/DetailModal";
 import SplashAnimation from "./components/SplashAnimation/SplashAnimation";
 import PlayAnimation from "./components/PlayAnimation/PlayAnimation";
+import SportsAnimation from "./components/SportsAnimation/SportsAnimation";
 import { selectCurrentUser } from './redux/auth/auth.selectors';
 import { selectSearchResults } from "./redux/search/search.selectors";
 import { checkUserSession } from "./redux/auth/auth.actions";
 import PlayMovie from "./components/PlayMovie/PlayMovie";
+import Sports  from "./pages/Sports/Sports";
+import PlaySports from "./components/PlaySports/PlaySports";
 //import Notification from "./components/Notification/Notification";
 //import React, { useState } from "react";
 
@@ -100,6 +103,9 @@ const App = () => {
                     <Route path="/splash" component={SplashAnimation} />
                     <Route path="/play" component={PlayAnimation} />
                     <Route path="/PlayMovie" component={PlayMovie} />
+                    <Route path="/playSport" component={SportsAnimation} />
+                    <Route path="/PlaySports" component={PlaySports} />
+                    
                     <Route
                         path="/search"
                         render={() =>
@@ -126,6 +132,11 @@ const App = () => {
                         exact
                         path="/tvseries"
                         render={() => (currentUser ? <TVSeries /> : <Redirect to="/login" />)}
+                    />
+                    <Route
+                        exact
+                        path="/Sports"
+                        render={() => (currentUser ? <Sports /> : <Redirect to="/login" />)}
                     />
                     <Route
                         exact
