@@ -7,8 +7,9 @@ const PlayAnimation = () => {
     const history = useHistory();
     const location = useLocation();
     const soundRef = useRef(null);
-    console.log("Location State in PlayAnimation:", location.state);
-    const { home, away} = location.state || {};
+
+    const home = location.state?.homeTeam;
+    const away = location.state?.awayTeam;
 
     const handleTadum = () => {
         soundRef.current.currentTime = 0;
@@ -17,19 +18,18 @@ const PlayAnimation = () => {
 
     useEffect(() => {
         handleTadum();
-   
+
         setTimeout(() => {
             history.push({
                 pathname: '/PlaySports',
                 state: {
-                    home: location.state?.homeTeam,
-                    away: location.state?.awayTeam,
-                    streamId: `${location.state?.homeTeam?.toLowerCase().replace(/\s+/g, "-")}-vs-${location.state?.awayTeam?.toLowerCase().replace(/\s+/g, "-")}`
-                  }
-                  
+                    home,
+                    away,
+                    streamId: `${home?.toLowerCase().replace(/\s+/g, "-")}-vs-${away?.toLowerCase().replace(/\s+/g, "-")}`
+                }
             });
         }, 4200);
-    }, [history, home, away]);
+    }, [history, home, away]); // Include home and away in the dependency array
 
     return (
         <div className="PlayAnimation__wrp">
