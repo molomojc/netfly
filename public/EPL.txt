@@ -1,2 +1,6 @@
 # Format: date|home_team|away_team|venue|image_url
-2025-04-23|22:00|Arsenal|Crystal Palace|Emirates Stadius|https://e0.365dm.com/25/04/1600x900/skysports-premier-league-arsenal_6892640.jpg?20250421095019
+2025-04-26|14:30|Chelsea|Everton|Emirates Stadius|https://i2-prod.football.london/incoming/article17377146.ece/ALTERNATES/s1200/0_Everton-Chelsea.jpg
+2025-04-26|17:00|Brighton|West Ham|Emirates Stadius|https://eplindex.com/wp-content/uploads/Brighton-vs-West-Ham.png
+2025-04-26|17:00|Newcastle|Ipswitch|Emirates Stadius|https://s.yimg.com/ny/api/res/1.2/CwPhHGMMpwkSLjraJ44wpw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTY0MDtoPTQyNjtjZj13ZWJw/https://media.zenfs.com/en/playmakerstats_articles_264/3b416aa827a448cd4ceb3ca3ce6b7d21
+2025-04-26|17:00|Southampton|Fulham|Emirates Stadius|https://s.yimg.com/ny/api/res/1.2/YK3tzNp2s09X1Pt7dhvcog--/YXBwaWQ9aGlnaGxhbmRlcjt3PTk2MDtoPTYzOTtjZj13ZWJw/https://media.zenfs.com/en/playmakerstats_articles_264/7097887d58a03f76fc99662cc7fd9fdf
+2025-04-26|17:00|Wolves|Leicester|Emirates Stadius|https://pbs.twimg.com/media/FfwvzkgVUAA8dqb.jpg
