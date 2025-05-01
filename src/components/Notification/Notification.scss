@@ -1,40 +1,40 @@
 .notification-overlay {
 	position: fixed;
 	inset: 0;
-	background: rgba(0, 0, 0, 0.7);
+	background: rgba(0, 0, 0, 0.75); /* Slightly darker overlay */
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	z-index: 1000;
-	overflow: hidden;
+	backdrop-filter: blur(4px);
+	animation: fadeInOverlay 0.3s ease-out;
 }
 
 .centered-notification {
-	background-color: #000;
-	color: white;
-	padding: 30px;
+	background-color: #141414; /* Netflix dark */
+	color: #fff;
+	padding: 40px 30px;
 	border-radius: 20px;
-    height: 100vh;
 	width: 90%;
-	max-width: 600px;
-	box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+	max-width: 480px;
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
 	position: relative;
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	animation: fadeIn 0.4s ease-out;
+	text-align: center;
+	animation: scaleIn 0.4s ease-out;
 }
 
 .notification-title {
-	color: #e50914; // Netflix red
-	font-size: 1.8rem;
-	font-weight: bold;
+	color: #e50914; /* Netflix red */
+	font-size: 2rem;
+	font-weight: 700;
 	margin-bottom: 1rem;
-	text-align: center;
 }
 
 .notification-content {
-	position: relative;
-	font-size: 1rem;
+	font-size: 1.05rem;
 	line-height: 1.6;
+	padding: 0 10px;
 }
 
 .notification-close {
@@ -43,9 +43,9 @@
 	right: 15px;
 	background: none;
 	border: none;
-	font-size: 24px;
+	font-size: 28px;
 	cursor: pointer;
-	color: #999;
+	color: #bbb;
 	transition: color 0.3s ease;
 }
 
@@ -53,13 +53,22 @@
 	color: #fff;
 }
 
-@keyframes fadeIn {
+@keyframes fadeInOverlay {
 	from {
 		opacity: 0;
-		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+	}
+}
+
+@keyframes scaleIn {
+	from {
+		transform: scale(0.95);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
 	}
 }

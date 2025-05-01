@@ -21,68 +21,72 @@ import { checkUserSession } from "./redux/auth/auth.actions";
 import PlayMovie from "./components/PlayMovie/PlayMovie";
 import Sports  from "./pages/Sports/Sports";
 import PlaySports from "./components/PlaySports/PlaySports";
-//import Notification from "./components/Notification/Notification";
-//import React, { useState } from "react";
+import Notification from "./components/Notification/Notification";
+import React, { useState } from "react";
+import "./App.css";
 
 
 
 
 
-/*
 
 const update = (
     <>
-        <p>Our team has been continuously improving the website.</p>
-        <p> Here are the latest updates:</p>
-        <br></br>
-        <br></br>
-        <p> In order to Mitigate the dangerous warning when trying to log in, we will be changing the domain to a proper one with added security </p>
-        <p>To: <a href="https://series2.netlify.app">The new Link,</a> This is Now available</p>
-        <p> we will also email you with the new Link</p>
-        <br></br>
-        <p> Other updates... </p>
-        <br></br>
-        <ul className="update-list">
-            <li>Multiple servers added — switch servers if audio/video is poor</li>
-            <li>Manual “Next Episode” button added temporarily on the season page</li>
-            <li>Choose your desired Season/Episode via the “More Info” page</li>
-            <li>“More Like This” section now available at the bottom of “More Info”</li>
-        </ul>
-
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <p className="update-signoff">ENJOY!!<br /><strong>- Cinema Team</strong></p>
+        <div className="desktop-app-announcement"></div>
+      <div className="desktop-app-announcement">
+  <h1 className="announcement-title">🚀 Introducing Our New Desktop App!</h1>
+  
+  <p className="announcement-subtitle">
+    Enjoy a premium viewing experience with our dedicated Windows application
+  </p>
+  
+  <div className="feature-list">
+    <h3>Exclusive Desktop Features:</h3>
+    <ul>
+      <li className="feature-item">
+        <span className="feature-icon">✔️</span>
+        <strong>No-ADS Experience:</strong> Watch without interruptions
+      </li>
+      <li className="feature-item">
+        <span className="feature-icon">✔️</span>
+         4K HDR support with smoother streaming
+      </li>
+      <li className="feature-item">
+        <span className="feature-icon">✔️</span>
+        <strong>SAFE:</strong> No dangerous warning
+      </li>
+    </ul>
+  </div>
+  
+  <div className="cta-section">
+    <p className="download-size"> Quick install</p>
+    <button className="download-button" onClick={() => window.location.href = "https://streaam.netlify.app"}>
+      Download Now for Windows
+    </button>
+   
+  </div>
+</div>
     </>
 )
-    */
-/*
-{showNotification && (
-    <Notification
-        content={update}
-        onClose={() => setShowNotification(false)}
-    />
-)} */
+    
+
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser);
     const searchResults = useSelector(selectSearchResults);
     const dispatch = useDispatch();
- //   const [showNotification, setShowNotification] = useState(true); // Correctly destructure useState
+   const [showNotification, setShowNotification] = useState(true); // Correctly destructure useState
 
     const location = useLocation();
 
     useEffect(() => {
         dispatch(checkUserSession());
-      /*
+      
         const timer = setTimeout(() => {
             setShowNotification(true);
-        }, 6000); 
-        */
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-
-       // return () => clearTimeout(timer);
+        }, 9000); 
+        
+        return () => clearTimeout(timer);
     }, [dispatch]);
 
     return (
@@ -91,7 +95,13 @@ const App = () => {
                 <>
                     <Navbar />
                     <DetailModal />
-
+                   
+{showNotification && (
+    <Notification
+        content={update}
+        onClose={() => setShowNotification(false)}
+    />
+)}  
                     
                 </>
             )}

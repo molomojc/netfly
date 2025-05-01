@@ -1,0 +1,66 @@
+.desktop-app-announcement {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.announcement-title {
+  color: #f5a623;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.announcement-subtitle {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.feature-list {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.feature-item {
+  margin: 0.8rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.feature-icon {
+  margin-right: 10px;
+  color: #4caf50;
+}
+
+.download-button {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 1rem 0;
+  transition: all 0.3s ease;
+}
+
+.download-button:hover {
+  background: #f40612;
+  transform: translateY(-2px);
+}
+
+.download-size {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.security-note {
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
