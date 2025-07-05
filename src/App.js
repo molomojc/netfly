@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { useDispatch, useSelector } from "react-redux";
+//import { useEffect } from "react"
+import { useSelector } from "react-redux";
 import { Route, Switch, Redirect, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar/Navbar"
@@ -17,19 +17,19 @@ import PlayAnimation from "./components/PlayAnimation/PlayAnimation";
 import SportsAnimation from "./components/SportsAnimation/SportsAnimation";
 import { selectCurrentUser } from './redux/auth/auth.selectors';
 import { selectSearchResults } from "./redux/search/search.selectors";
-import { checkUserSession } from "./redux/auth/auth.actions";
+//import { checkUserSession } from "./redux/auth/auth.actions";
 import PlayMovie from "./components/PlayMovie/PlayMovie";
 import Sports  from "./pages/Sports/Sports";
 import PlaySports from "./components/PlaySports/PlaySports";
-import Notification from "./components/Notification/Notification";
-import React, { useState } from "react";
+//import Notification from "./components/Notification/Notification";
+//import React, { useState } from "react";
 import "./App.css";
 
 
 
 
 
-
+/*
 const update = (
     <>
         <div className="desktop-app-announcement"></div>
@@ -70,15 +70,26 @@ const update = (
 )
     
 
+{showNotification && (
+    <Notification
+        content={update}
+        onClose={() => setShowNotification(false)}
+    />
+)}  
+
+*/
+
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser);
     const searchResults = useSelector(selectSearchResults);
-    const dispatch = useDispatch();
-   const [showNotification, setShowNotification] = useState(true); // Correctly destructure useState
+    //const dispatch = useDispatch();
 
     const location = useLocation();
+    /*
+   const [ setShowNotification] = useState(true); 
 
+    
     useEffect(() => {
         dispatch(checkUserSession());
       
@@ -88,20 +99,14 @@ const App = () => {
         
         return () => clearTimeout(timer);
     }, [dispatch]);
-
+    */
     return (
         <div className="App">
             {currentUser && (
                 <>
                     <Navbar />
                     <DetailModal />
-                   
-{showNotification && (
-    <Notification
-        content={update}
-        onClose={() => setShowNotification(false)}
-    />
-)}  
+                                 
                     
                 </>
             )}
