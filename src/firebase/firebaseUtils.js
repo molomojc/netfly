@@ -90,9 +90,20 @@ export const getCurrentUser = () => {
         }, reject);
     });
 };
+//get .getIdToken();
+
 
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
+export const getIdToken = async () => {
+    const user = auth.currentUser;
+    if (user) {
+        return await user.getIdToken();
+    }
+    return null;
+};
+
+
 export const googleProvider = new firebase.auth.GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
 export const signInWithGoogle = () => auth.signInWithPopup(googleProvider);

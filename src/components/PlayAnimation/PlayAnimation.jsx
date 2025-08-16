@@ -8,7 +8,7 @@ const PlayAnimation = () => {
     const location = useLocation();
     const soundRef = useRef(null);
     console.log("Location State in PlayAnimation:", location.state);
-    const { id, isTv, Season, Episode} = location.state || {};
+    const {fallbackTitle, id, isTv, Season, Episode} = location.state || {};
 
     const handleTadum = () => {
         soundRef.current.currentTime = 0;
@@ -24,10 +24,10 @@ const PlayAnimation = () => {
         setTimeout(() => {
             history.push({
                 pathname: '/PlayMovie',
-                state: { id, isTv,Season, Episode }, // Pass the ID and the flag
+                state: {fallbackTitle, id, isTv,Season, Episode }, // Pass the ID and the flag
             });
         }, 4200);
-    }, [history, id, isTv, Season, Episode]);
+    }, [history,fallbackTitle, id, isTv, Season, Episode]);
 
     return (
         <div className="PlayAnimation__wrp">

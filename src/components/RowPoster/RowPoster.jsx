@@ -63,7 +63,7 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
         console.log("Episode:", Episode); // Debugging
         history.push({
             pathname: "/play",
-            state: { id, isTv, Season, Episode}, // Pass the ID and isTv flag
+            state: {fallbackTitle, id, isTv, Season, Episode}, // Pass the ID and isTv flag
         });
     };
 

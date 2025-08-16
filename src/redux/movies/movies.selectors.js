@@ -12,6 +12,24 @@ export const selectTrendingMovies = state => state.movies.trendingMovies;
 export const selectUpcomingMovies = state => state.movies.upcomingMovies;
 export const selectLatestMovies = state => state.movies.latestMovies;
 
+
+export const selectRecommendations = state => state.movies.recommendations;
+
+export const selectRecommendationsData = createSelector(
+  [selectRecommendations],
+  recommendations => recommendations.data 
+);
+
+
+
+export const selectHistory = state => state.movies.history;
+
+export const selectHistoryData = createSelector(
+  [selectHistory],
+  history => history.data 
+);
+
+
 export const selectActionMoviesSelector = createSelector(
     [selectActionMovies],
     actionMovies => actionMovies.data

@@ -167,7 +167,7 @@ const DetailModal = () => {
         handleModalClose();
         history.push({
             pathname: "/Play",
-            state: { id, isTv,Season,Episode }, // Pass the ID and isTv flag
+            state: {fallbackTitle, id, isTv,Season,Episode }, // Pass the ID and isTv flag
         });
     };
 

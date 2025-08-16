@@ -1,0 +1,82 @@
+// mockRecommendations.js
+export const mockHistory = {
+    results: [
+        {
+            adult: false,
+            backdrop_path: "/kGzFbGhp99zva6oZODW5atUtnqi.jpg",
+            genre_ids: [18, 80],
+            id: 238,
+            isFavourite: false,
+            original_language: "en",
+            original_title: "The Godfather",
+            overview: "Spanning the years 1945 to 1955, a chronicle of the fictional Italian-American Corleone crime family. When organized crime family patriarch, Vito Corleone barely survives an attempt on his life, his youngest son, Michael steps in to take care of the would-be killers, launching a campaign of bloody revenge.",
+            popularity: 178.321,
+            poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+            release_date: "1972-03-14",
+            title: "The Godfather",
+            video: false,
+            vote_average: 8.7,
+            vote_count: 18765,
+            media_type: "movie"
+          },
+      {
+        adult: false,
+        backdrop_path: "/zLX0ExkHc4xJ9X7pQEpqQ2K0uxF.jpg",
+        genre_ids: [28, 12, 878],
+        id: 603,
+        isFavourite: false,
+        original_language: "en",
+        original_title: "The Matrix",
+        overview: "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+        popularity: 298.543,
+        poster_path: "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+        release_date: "1999-03-30",
+        title: "The Matrix",
+        video: false,
+        vote_average: 8.2,
+        vote_count: 23567,
+        media_type: "movie"
+      },
+      {
+        adult: false,
+        backdrop_path: "/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg",
+        genre_ids: [18, 80],
+        id: 278,
+        isFavourite: false,
+        original_language: "en",
+        original_title: "The Shawshank Redemption",
+        overview: "Framed in the 1940s for the double murder of his wife and her lover, upstanding banker Andy Dufresne begins a new life at the Shawshank prison, where he puts his accounting skills to work for an amoral warden. During his long stretch in prison, Dufresne comes to be admired by the other inmates -- including an older prisoner named Red -- for his integrity and unquenchable sense of hope.",
+        popularity: 156.789,
+        poster_path: "/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
+        release_date: "1994-09-23",
+        title: "The Shawshank Redemption",
+        video: false,
+        vote_average: 8.7,
+        vote_count: 24345,
+        media_type: "movie"
+      },
+      
+      {
+        adult: false,
+        backdrop_path: "/7HqLLVjdjhXS0Qoz1SgZofhkIpE.jpg",
+        genre_ids: [14, 10751, 28, 12],
+        id: 1087192,
+        isFavourite: false,
+        original_language: "en",
+        original_title: "How to Train Your Dragon",
+        overview: "On the rugged isle of Berk, where Vikings and dragons have been bitter enemies for generations, Hiccup stands apart, defying centuries of tradition when he befriends Toothless, a feared Night Fury dragon. Their unlikely bond reveals the true nature of dragons, challenging the very foundations of Viking society.",
+        popularity: 344.4482,
+        poster_path: "/q5pXRYTycaeW6dEgsCrd4mYPmxM.jpg",
+        release_date: "2025-06-06",
+        title: "How to Train Your Dragon",
+        video: false,
+        vote_average: 8.028,
+        vote_count: 1572,
+        media_type: "movie"
+      }
+     
+    ],
+    page: 1,
+    total_pages: 1,
+    total_results: 5
+  };

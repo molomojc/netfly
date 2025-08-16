@@ -1,5 +1,145 @@
 import axios from '../../axiosInstance';
+import axio from 'axios';
 import { seriesActionTypes } from './series.types';
+
+import { mockRecommendations } from './SeriesDemoRec';
+import { getIdToken } from '../../firebase/firebaseUtils';
+
+
+
+
+// Action creators
+export const fetchRecommendationsRequest = () => ({
+  type: seriesActionTypes.FETCH_RECOMMENDATIONS_REQUEST,
+});
+
+export const fetchRecommendationsSuccess = (recommendations, isPage) => ({
+  type: isPage
+    ? seriesActionTypes.FETCH_RECOMMENDATIONS_SUCCESS
+    : seriesActionTypes.LOAD_MORE_RECOMMENDATIONS_SUCCESS,
+  payload: recommendations,
+});
+
+export const fetchRecommendationsFailure = (error) => ({
+  type: seriesActionTypes.FETCH_RECOMMENDATIONS_FAILURE,
+  payload: error,
+});
+
+
+
+export const fetchRecommendations = (fetchUrl, isPage = true) => {
+  return async (dispatch) => {
+    dispatch(fetchRecommendationsRequest());
+    const token = await getIdToken(); 
+	if (!token) return; 
+    try {
+     
+      const response = await axio.get(fetchUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Process API response
+      const data = response.data?.results ? response.data : { results: [] };
+      const recommendations = data.results.map(item => ({
+        ...item,
+        isFavourite: false,
+        media_type: item.media_type || 'movie'
+      }));
+
+      dispatch(fetchRecommendationsSuccess(recommendations, isPage));
+      
+    } catch (error) {
+      console.warn("API failed, using mock data:", error.message);
+      
+      // Fallback to mock data
+      try {
+        const mockData = mockRecommendations.results || [];
+        const recommendations = mockData.map(item => ({
+          ...item,
+          isFavourite: false,
+          media_type: item.media_type || 'movie'
+        }));
+        
+        dispatch(fetchRecommendationsSuccess(recommendations, isPage, true));
+      } catch (mockError) {
+        console.error("Mock data failed:", mockError);
+        dispatch(fetchRecommendationsFailure("Failed to load recommendations"));
+      }
+    }
+  };
+};
+
+
+//============START OF HISTORY ACTIONS==================
+
+export const fetchHistoryRequest = () => ({
+    type: seriesActionTypes.FETCH_HISTORY_REQUEST,
+  });
+  
+  export const fetchHistorySuccess = (history, isPage) => ({
+    type: isPage
+      ? seriesActionTypes.FETCH_HISTORY_SUCCESS
+      : seriesActionTypes.LOAD_MORE_HISTORY_SUCCESS,
+    payload: history,
+  });
+  
+  export const fetchHistoryFailure = (error) => ({
+    type: seriesActionTypes.FETCH_HISTORY_FAILURE,
+    payload: error,
+  });
+
+  export const fetchhistory = (isPage = true) => {
+    return async (dispatch) => {
+      dispatch(fetchHistoryRequest());
+  
+      const token = await getIdToken();
+      if (!token) return; // user not logged in
+  
+      try {
+        // Call your backend endpoint
+        const response = await fetch("http://localhost:5000/history", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  
+        const data = await response.json();
+  
+        // The backend returns { recommended: [...] }
+        const recommendations = data.recommended.map((item) => ({
+          ...item,
+          isFavourite: false,
+          media_type: item.media_type || "movie",
+        }));
+  
+        dispatch(fetchHistorySuccess(recommendations, isPage));
+      } catch (error) {
+        console.warn("API failed, using mock data:", error.message);
+  
+        // Fallback to mock data
+        try {
+          const mockData = mockRecommendations.results || [];
+          const recommendations = mockData.map((item) => ({
+            ...item,
+            isFavourite: false,
+            media_type: item.media_type || "movie",
+          }));
+  
+          dispatch(fetchHistorySuccess(recommendations, isPage, true));
+        } catch (mockError) {
+          console.error("Mock data failed:", mockError);
+          dispatch(fetchHistoryFailure("Failed to load recommendations"));
+        }
+      }
+    };
+  };
+//===========EOF HISTORY ACTIONS==================
 
 // Netflix
 export const fetchNetflixSeriesRequest = () => ({

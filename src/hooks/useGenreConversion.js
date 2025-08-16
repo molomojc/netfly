@@ -1,16 +1,23 @@
 import { genresList } from "../dataConfig";
 
-const useGenreConversion = genreIds => {
-	const genresConvertedList = [];
-	genreIds
-		.slice(0, 3)
-		.map(genreId =>
-			genresList
-				.filter(el => el.id === genreId)
-				.map(el => genresConvertedList.push(el.name))
-		);
+const useGenreConversion = (item = {}) => {
+  const genresConvertedList = [];
 
-	return genresConvertedList;
+  const genreIds = item.genre_ids || [];
+  const genres = item.genres || [];
+
+  if (genreIds.length) {
+    genreIds.slice(0, 3).forEach(genreId => {
+      const genre = genresList.find(el => el.id === genreId);
+      if (genre) genresConvertedList.push(genre.name);
+    });
+  } else if (genres.length) {
+    genres.slice(0, 3).forEach(genre => {
+      if (genre.name) genresConvertedList.push(genre.name);
+    });
+  }
+
+  return genresConvertedList;
 };
 
 export default useGenreConversion;

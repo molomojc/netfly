@@ -9,6 +9,7 @@ import favourites from "./favourites";
 import search from "./search";
 import detailModal from "./modal";
 
+
 const persistConfig = {
     key: 'root',
     storage,

@@ -10,8 +10,12 @@ import trendingMoviesReducer from "./trending.reducer";
 import animationMoviesReducer from './animation.reducer';
 import upcomingMoviesReducer from './upcoming.reducer';
 import latestReleasedMoviesReducer from "./latestReleased.reducer";
+import recommendationsReducer  from './reccomendation.reducer';
+import historyReducer from "./history.reducer";
 
 export default combineReducers({
+    history: historyReducer,
+    recommendations: recommendationsReducer,
     actionMovies: actionMoviesReducer,
     adventureMovies: adventureMoviesReducer,
     animationMovies: animationMoviesReducer,

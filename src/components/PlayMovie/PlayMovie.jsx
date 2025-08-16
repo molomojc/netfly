@@ -2,15 +2,60 @@ import React, { useState, useEffect } from "react";
 import { useLocation} from "react-router-dom"; // Replace useNavigate with useHistory
 import { FaForward } from "react-icons/fa";
 import "./PlayMovie.scss"; // Import your styles here
+import axio from "axios"; 
+import { getIdToken } from '../../firebase/firebaseUtils';
+
+
+
+
+
 
 const PlayMovie = () => {
+  
+   
     const location = useLocation();
   //  const history = useHistory(); // Replace navigate with history
-    const { id, isTv, Season: initialSeason = 1, Episode: initialEpisode = 1 } = location.state || {};
+    const {fallbackTitle, id, isTv, Season: initialSeason = 1, Episode: initialEpisode = 1 } = location.state || {};
     const [currentServer, setCurrentServer] = useState(1);
     const [currentSeason] = useState(initialSeason);
     const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
+    
+    //send fallbacktitle and id to localhost:3000/watched
+    useEffect(() => {
+        const sendWatched = async () => {
+          const token = await getIdToken(); 
+          if (!token) return; // user not logged in
+      
+          const watchedData = {
+            movie: {
+              title: fallbackTitle,
+              id: id,
+              isTv: isTv,
+              season: currentSeason,
+              episode: currentEpisode
+            }
+          };
+      
+          axio.post('https://flixcinema.onrender.com/watched', watchedData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
+            console.log("Watched data sent successfully:", response.data);
+          })
+          .catch(error => {
+            console.error("Error sending watched data:", error);
+          });
+        };
+      
+        sendWatched();
+      }, [fallbackTitle, id, isTv, currentSeason, currentEpisode]);
 
+
+
+    console.log("Fallback Title in PlayMovie:", fallbackTitle);
     useEffect(() => {
         // When currentEpisode or currentSeason changes, re-render iframe
     }, [currentEpisode, currentSeason]);

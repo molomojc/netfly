@@ -105,7 +105,7 @@ const Banner = ({ type }) => {
         event.stopPropagation();
         history.push({
             pathname: '/play',
-            state: { id, isTv, Season, Episode },
+            state: {fallbackTitle, id, isTv, Season, Episode },
         });
     };
 

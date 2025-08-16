@@ -11,6 +11,20 @@ export const selectKidsSeries = state => state.series.kidsSeries;
 export const selectSciFiFantasySeries = state => state.series.sciFiFantasySeries;
 export const selectTrendingSeries = state => state.series.trendingSeries;
 
+export const selectRecommendations = state => state.series.recommendations;
+
+export const selectRecommendationsData = createSelector(
+  [selectRecommendations],
+  recommendations => recommendations.data 
+);
+
+export const selectHistory = state => state.series.history;
+
+export const selectHistoryData = createSelector(
+  [selectHistory],
+  history => history.data 
+);
+
 export const selectNetflixSeriesSelector = createSelector(
     [selectNetflixSeries],
     netflixSeries => netflixSeries.data

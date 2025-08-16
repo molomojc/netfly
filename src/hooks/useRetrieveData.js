@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
-import { fetchMovieDataConfig, fetchPopularDataConfig, fetchSeriesDataConfig } from "../dataConfig";
+import { fetchMovieDataConfig, fetchPopularDataConfig, fetchSeriesDataConfig} from "../dataConfig";
 
+//
+// [...fetchMovieDataConfig, fetchRecommendationsConfig];
 export const useRetrieveData = (type) => {
 
     const dispatch = useDispatch()
