@@ -66,14 +66,14 @@ const PlayMovie = () => {
 
     const servers = {
         1: isTv
-            ? `https://vidsrc.cc/v2/embed/tv/${id}/${currentSeason}/${currentEpisode}`
-            : `https://vidsrc.cc/v2/embed/movie/${id}`,
+            ? `https://vidsrc-embed.ru/embed/tv/${id}/${currentSeason}-${currentEpisode}`
+            : `https://vidsrc-embed.ru/embed/movie/${id}`,
         2: isTv
-            ? `https://vidsrc.xyz/embed/tv/${id}/${currentSeason}-${currentEpisode}`
-            : `https://vidsrc.xyz/embed/movie/${id}`,
+            ? `https://vidsrc.to/embed/tv/${id}/${currentSeason}-${currentEpisode}`
+            : `https://vidsrc.to/embed/movie/${id}`,
         3: isTv
-            ? `https://www.2embed.cc/embedtv/${id}&s=${currentSeason}&e=${currentEpisode}`
-            : `https://www.2embed.cc/embed/${id}`,
+            ? `https://vidsrc-embed.ru/embed/tv/${id}/${currentSeason}-${currentEpisode}`
+            : `https://vidsrc-embed.ru/embed/movie/${id}`,
     };
 
     return (
