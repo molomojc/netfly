@@ -66,8 +66,8 @@ const PlayMovie = () => {
 
     const servers = {
         1: isTv
-            ? `https://vidsrc-embed.ru/embed/tv/${id}/${currentSeason}-${currentEpisode}`
-            : `https://vidsrc-embed.ru/embed/movie/${id}`,
+            ? `https://player.videasy.net/tv/${id}/${currentSeason}/${currentEpisode}`
+            : `https://player.videasy.net/movie/${id}`,
         2: isTv
             ? `https://vidsrc.to/embed/tv/${id}/${currentSeason}-${currentEpisode}`
             : `https://vidsrc.to/embed/movie/${id}`,
