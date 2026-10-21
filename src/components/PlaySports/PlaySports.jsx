@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import "./PlaySports.scss";
 
@@ -19,7 +19,7 @@ const PlaySports = () => {
 
     const INACTIVITY_TIMEOUT = 30000; // 30 seconds
 
-    const resetInactivityTimer = () => {
+    const resetInactivityTimer = useCallback(() => {
         if (inactivityTimerRef.current) {
             clearTimeout(inactivityTimerRef.current);
         }
@@ -28,15 +28,15 @@ const PlaySports = () => {
                 setShowOverlay(true);
             }, INACTIVITY_TIMEOUT);
         }
-    };
+    }, [showOverlay]);
 
-    const handleOverlayClick = () => {
+    const handleOverlayClick = useCallback(() => {
         setShowOverlay(false);
         if (iframeRef.current) {
             iframeRef.current.focus();
         }
         resetInactivityTimer();
-    };
+    }, [resetInactivityTimer]);
 
     // Track user activity on the container to reset inactivity timer
     useEffect(() => {
@@ -53,7 +53,7 @@ const PlaySports = () => {
                 clearTimeout(inactivityTimerRef.current);
             }
         };
-    }, [showOverlay]);
+    }, [resetInactivityTimer]);
 
     // Reset overlay when source/stream changes
     useEffect(() => {

@@ -1,5 +1,5 @@
 import "./playAnimation.scss";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { TADUM_SOUND_URL } from "../../requests";
 
@@ -18,7 +18,7 @@ const PlayAnimation = () => {
 
     // Forward every bit of state (poster, media type, resume position...) so the
     // player gets the same payload whether the splash was shown or skipped.
-    const nextState = { ...location.state, fallbackTitle, id, isTv, Season, Episode };
+    const nextState = useMemo(() => ({ ...location.state, fallbackTitle, id, isTv, Season, Episode }), [location.state, fallbackTitle, id, isTv, Season, Episode]);
 
     const handleClick = () => {
         if (!clicked) {
@@ -45,7 +45,7 @@ const PlayAnimation = () => {
             }
         }, 4200);
         return () => clearTimeout(timer);
-    }, [history, fallbackTitle, id, isTv, Season, Episode, clicked]);
+    }, [history, fallbackTitle, id, isTv, Season, Episode, clicked, nextState]);
 
     return (
         <div className="PlayAnimation__wrp" onClick={handleClick} style={{ cursor: "pointer" }}>

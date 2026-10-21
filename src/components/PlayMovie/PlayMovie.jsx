@@ -128,7 +128,7 @@ const PlayMovie = () => {
   const [showOverlay, setShowOverlay] = useState(true);
   const INACTIVITY_TIMEOUT = 30000; // 30 seconds
 
-  const resetInactivityTimer = () => {
+  const resetInactivityTimer = useCallback(() => {
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current);
     }
@@ -137,15 +137,15 @@ const PlayMovie = () => {
         setShowOverlay(true);
       }, INACTIVITY_TIMEOUT);
     }
-  };
+  }, [showOverlay]);
 
-  const handleOverlayClick = () => {
+  const handleOverlayClick = useCallback(() => {
     setShowOverlay(false);
     if (iframeRef.current) {
       iframeRef.current.focus();
     }
     resetInactivityTimer();
-  };
+  }, [resetInactivityTimer]);
 
   // Track user activity on the container to reset inactivity timer
   useEffect(() => {
@@ -162,7 +162,7 @@ const PlayMovie = () => {
         clearTimeout(inactivityTimerRef.current);
       }
     };
-  }, [showOverlay]);
+  }, [resetInactivityTimer]);
 
   // Reset overlay when server/episode changes
   useEffect(() => {
@@ -459,20 +459,22 @@ const PlayMovie = () => {
   // 2 = Prime (framextv embed player)
   // 3 = vidsrc.to (formerly Server 2)
   // 4 = vidsrc-embed.ru (formerly Server 3)
-  const framextvEmbed = isTv
-    ? `https://framextv.xyz/embed/${id}/${currentSeason}/${currentEpisode}`
-    : `https://framextv.xyz/embed/${id}`;
+  const servers = useMemo(() => {
+    const framextvEmbed = isTv
+      ? `https://framextv.xyz/embed/${id}/${currentSeason}/${currentEpisode}`
+      : `https://framextv.xyz/embed/${id}`;
 
-  const servers = {
-    1: framextvEmbed,
-    2: framextvEmbed,
-    3: isTv
-      ? `https://vidsrc.to/embed/tv/${id}/${currentSeason}-${currentEpisode}`
-      : `https://vidsrc.to/embed/movie/${id}`,
-    4: isTv
-      ? `https://vidsrc-embed.ru/embed/tv/${id}/${currentSeason}-${currentEpisode}`
-      : `https://vidsrc-embed.ru/embed/movie/${id}`,
-  };
+    return {
+      1: framextvEmbed,
+      2: framextvEmbed,
+      3: isTv
+        ? `https://vidsrc.to/embed/tv/${id}/${currentSeason}-${currentEpisode}`
+        : `https://vidsrc.to/embed/movie/${id}`,
+      4: isTv
+        ? `https://vidsrc-embed.ru/embed/tv/${id}/${currentSeason}-${currentEpisode}`
+        : `https://vidsrc-embed.ru/embed/movie/${id}`,
+    };
+  }, [id, isTv, currentSeason, currentEpisode]);
 
   const extractDirectStream = useCallback(async (embedUrl) => {
     if (!USE_DIRECT_STREAM || !embedUrl) return;
@@ -523,7 +525,7 @@ const PlayMovie = () => {
       setAllSubtitles([]);
       setActiveSubtitleIndex(-1);
     }
-  }, [currentServer, currentEpisode, currentSeason, id, isTv, extractDirectStream]);
+  }, [currentServer, currentEpisode, currentSeason, id, isTv, extractDirectStream, servers]);
 
   return (
     <div className="PlayMovie__wrp" ref={containerRef}>
