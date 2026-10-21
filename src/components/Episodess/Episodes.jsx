@@ -7,7 +7,7 @@ import { FaPlay } from 'react-icons/fa';
 import { useDispatch} from "react-redux";
 import './Episodes.scss';
 
-const Episodes = ({ tvId, seasonNumber }) => {
+const Episodes = ({ tvId, seasonNumber, title, posterPath, backdropPath, genreIds, voteAverage, originalLanguage, releaseDate }) => {
     const history = useHistory();
     const dispatch = useDispatch();
     const [episodes, setEpisodes] = useState([]);
@@ -57,6 +57,15 @@ const Episodes = ({ tvId, seasonNumber }) => {
             state: { 
                 id: tvId, 
                 isTv: true,
+                media_type: "tv",
+                fallbackTitle: title,
+                poster_path: posterPath,
+                backdrop_path: backdropPath,
+                // Used by the local recommendation engine's taste profile.
+                genre_ids: genreIds,
+                vote_average: voteAverage,
+                original_language: originalLanguage,
+                release_date: releaseDate,
                 Season: seasonNumber,
                 Episode: episodeNumber
             },

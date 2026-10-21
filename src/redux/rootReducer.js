@@ -8,12 +8,14 @@ import series from "./series";
 import favourites from "./favourites";
 import search from "./search";
 import detailModal from "./modal";
+import history from "./history";
 
 
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['favourites']
+    // `history` holds "Continue Watching" and lives in localStorage only.
+    whitelist: ['favourites', 'history']
 }
 
 const rootReducer = combineReducers({
@@ -22,7 +24,8 @@ const rootReducer = combineReducers({
     movies,
     series,
     favourites,
-    detailModal
+    detailModal,
+    history
 })
 
 export default persistReducer(persistConfig, rootReducer);

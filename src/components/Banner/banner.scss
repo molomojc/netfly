@@ -10,12 +10,13 @@
     width: 100%;
     display: flex;
     align-items: flex-end;
-    height: 90vh;
+    // The page reserves the fixed navbar's height above the hero
+    height: calc(90vh - 70px);
     background: vars.$black;
     overflow: hidden;
 
     @include mix.mq(lg) {
-        height: 80vh;
+        height: calc(80vh - 70px);
         align-items: center;
     }
 
@@ -187,6 +188,34 @@
 
         span {
             margin-left: 8px;
+        }
+    }
+
+    &__mute {
+        position: absolute;
+        top: 12vh;
+        right: 4vw;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid rgba(vars.$white, 0.6);
+        background-color: rgba(vars.$black, 0.45);
+        color: vars.$white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
+
+        &:hover {
+            background-color: rgba(vars.$black, 0.75);
+            border-color: vars.$white;
+        }
+
+        @include mix.mq(lg) {
+            top: 14vh;
         }
     }
 

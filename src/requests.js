@@ -16,7 +16,11 @@ const ONEMONTHAGO = getOneMonthAgoReleaseDate();
 const { REACT_APP_TMDB_API_KEY } = process.env;
 
 // Helper function to get trailer URL from TMDB videos response
-export const fetchTrailerUrl = async (id, mediaType = 'movie') => {
+export const fetchTrailerUrl = async (
+  id,
+  mediaType = 'movie',
+  { muted = false } = {}
+) => {
   try {
     const response = await fetch(
       `https://api.themoviedb.org/3/${mediaType}/${id}/videos?api_key=${REACT_APP_TMDB_API_KEY}&language=${LANG}`
@@ -37,7 +41,16 @@ export const fetchTrailerUrl = async (id, mediaType = 'movie') => {
     
     // Return embed URL based on site
     if (trailer.site === 'YouTube') {
-      return `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=0&controls=0&modestbranding=1&rel=0`;
+      // Muted autoplay is allowed without a user gesture, which matters on the
+      // first load after login (the splash redirects to /browse automatically).
+      // The player API lets the banner unmute later from a click.
+      const origin =
+        typeof window !== 'undefined'
+          ? `&origin=${encodeURIComponent(window.location.origin)}`
+          : '';
+      return `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${
+        muted ? 1 : 0
+      }&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1${origin}`;
     } else if (trailer.site === 'Vimeo') {
       return `https://player.vimeo.com/video/${trailer.key}?autoplay=1&muted=1`;
     }

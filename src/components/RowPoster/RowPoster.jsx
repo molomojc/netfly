@@ -8,13 +8,13 @@ import { showModalDetail } from "../../redux/modal/modal.actions";
 import { useHistory } from "react-router-dom"; // Add useHistory
 
 const RowPoster = ({ item, isLarge, isFavourite }) => {
-    const { title, original_name, original_title, name, genre_ids, poster_path, backdrop_path, id, media_type } = item;
-    const fallbackTitle = title || original_title || name || original_name;
+    const { title, original_name, original_title, name, genre_ids, poster_path, backdrop_path, id, vote_average, original_language, release_date, first_air_date, overview } = item;    const fallbackTitle = title || original_title || name || original_name;
     const genresConverted = useGenreConversion(genre_ids);
     const dispatch = useDispatch();
     const history = useHistory(); // Add useHistory
 
     const getMediaType = () => {
+        if (item.media_type === 'tv' || item.media_type === 'movie') return item.media_type;
         if (item.original_name || item.name) return 'tv';
         if (item.original_title || item.title) return 'movie';
         return item.first_air_date ? 'tv' : 'movie';
@@ -24,7 +24,7 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
    //   const isTvv = mediaType === 'tv';
     //  const dateToShow = isTv ? item.first_air_date : item.release_date;
    
-	const isTv = media_type === "tv"; // Use mediaType to determine isTv
+	const isTv = mediaType === "tv"; // Use the inferred media type
     const Season = isTv ? 1 : 0;
     const Episode = isTv ? 1 : 0;
 
@@ -63,7 +63,23 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
         console.log("Episode:", Episode); // Debugging
         history.push({
             pathname: "/play",
-            state: {fallbackTitle, id, isTv, Season, Episode}, // Pass the ID and isTv flag
+            state: {
+                fallbackTitle,
+                id,
+                isTv,
+                Season,
+                Episode,
+                media_type: mediaType,
+                poster_path,
+                backdrop_path,
+                // Used by the local recommendation engine's taste profile.
+                genre_ids,
+                vote_average,
+                original_language,
+                release_date,
+                first_air_date,
+                overview,
+            }, // Pass the ID and isTv flag
         });
     };
 

@@ -1,6 +1,8 @@
 import "./movies.scss"
 import Banner from "../../components/Banner/Banner"
 import Row from "../../components/Row/Row"
+import ContinueWatchingRow from "../../components/ContinueWatchingRow/ContinueWatchingRow"
+import CategoryFilter from "../../components/CategoryFilter/CategoryFilter"
 import Credits from "../../components/Credits/Credits";
 import { useRetrieveData } from "../../hooks/useRetrieveData";
 import { motion } from "framer-motion";
@@ -17,7 +19,11 @@ const Movies = () => {
             animate="animate"
             exit="exit"
         >
-            <Banner type='movies' />
+            <div className="CategoryFilterAnchor">
+                <Banner type='movies' />
+                <CategoryFilter />
+            </div>
+            <ContinueWatchingRow mediaType="movie" />
             {rows && rows.map(props => (
                 <Row key={props.id} {...props} />
             ))}

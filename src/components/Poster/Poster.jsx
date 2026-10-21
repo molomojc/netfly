@@ -11,13 +11,16 @@ import { useHistory } from "react-router-dom";
 
 const Poster = ({ item, isFavourite }) => {
     const history = useHistory();
-    const { title, original_name, original_title, name, genre_ids, backdrop_path, id, media_type } = item;
+    const { title, original_name, original_title, name, genre_ids, poster_path, backdrop_path, id, media_type, vote_average, original_language, release_date, first_air_date, overview } = item;
     let fallbackTitle = title || original_title || name || original_name;
     const genresConverted = useGenreConversion(genre_ids);
     const dispatch = useDispatch();
 
-    // Determine if the item is a TV series based on `media_type`
-    const isTv = media_type === "tv";
+    // Series endpoints do not always include `media_type`, so infer it too.
+    const inferredMediaType =
+        media_type ||
+        (item.first_air_date || item.name || item.original_name ? "tv" : "movie");
+    const isTv = inferredMediaType === "tv";
     const Season = isTv ? 1 : 0;
     const Episode = isTv ? 1 : 0;
 
@@ -45,7 +48,23 @@ const Poster = ({ item, isFavourite }) => {
         event.stopPropagation();
         history.push({
             pathname: "/play",
-            state: { id, isTv,Season,Episode }, // Pass the ID and isTv flag
+            state: {
+                fallbackTitle,
+                id,
+                isTv,
+                Season,
+                Episode,
+                media_type: inferredMediaType,
+                poster_path,
+                backdrop_path,
+                // Used by the local recommendation engine's taste profile.
+                genre_ids,
+                vote_average,
+                original_language,
+                release_date,
+                first_air_date,
+                overview,
+            }, // Pass the ID and isTv flag
         });
     };
 

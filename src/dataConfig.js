@@ -13,8 +13,7 @@ import {
   fetchTopRatedMoviesAsync,
   fetchTrendingMoviesAsync,
   fetchUpcomingMoviesAsync,
-  fetchRecommendations,
-  fetchhistory,
+  fetchRecommendations as fetchMovieRecommendations,
 } from "./redux/movies/movies.actions";
 import {
   fetchActionAdventureSeriesAsync,
@@ -25,6 +24,7 @@ import {
   fetchFamilySeriesAsync,
   fetchKidsSeriesAsync,
   fetchNetflixSeriesAsync,
+  fetchRecommendations as fetchSeriesRecommendations,
   fetchSciFiFantasySeriesAsync,
   fetchTrendingSeriesAsync,
 } from "./redux/series/series.actions";
@@ -55,21 +55,13 @@ const {
 export const fetchMovieDataConfig = [
   {
     id: "recommendations",
-    thunk: fetchRecommendations,
-    url: "http://localhost:5000/AIrecommendations",
+    thunk: fetchMovieRecommendations,
+    // Built in the browser from localStorage; no network request.
+    url: "local",
     title: "Recommended For You",
     genre: "recommendations",
     selector: movieSelectors.selectRecommendations,
   },
-  {
-    id: "history",
-    thunk: fetchhistory,
-    url: "http://localhost:5000/history",
-    title: "Continue Watching",
-    genre: "history",
-    selector: movieSelectors.selectHistory,
-  },
-
   {
     id: 0,
     thunk: fetchTrendingMoviesAsync,
@@ -156,19 +148,12 @@ export const fetchMovieDataConfig = [
 export const fetchSeriesDataConfig = [
   {
     id: "recommendations",
-    thunk: fetchhistory,
-    url: "localhost:5000/AIrecommendations",
+    thunk: fetchSeriesRecommendations,
+    // Built in the browser from localStorage; no network request.
+    url: "local",
     title: "Recommended For You",
     genre: "recommendations",
     selector: seriesSelectors.selectRecommendations,
-  },
-  {
-    id: "recommendations",
-    thunk: fetchRecommendations,
-    url: "localhost:5000/recommendations",
-    title: "Continue Watching",
-    genre: "history",
-    selector: seriesSelectors.selectHistory,
   },
   {
     id: 0,

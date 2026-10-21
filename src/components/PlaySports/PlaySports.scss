@@ -1,10 +1,11 @@
-.PlayMovie__wrp {
+.PlaySports__wrp {
     
     .server-buttons {
         display: flex;
         gap: 10px;
         justify-content: center;
         margin: 10px 0;
+        flex-wrap: wrap;
     }
 
     .server-buttons button {

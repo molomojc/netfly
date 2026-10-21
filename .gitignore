@@ -27,3 +27,5 @@ firebase-debug.log*
 .idea
 .env
 package-lock.json
+# keep the extractor lockfile
+!/m3u8-extractor/package-lock.json

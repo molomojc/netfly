@@ -1,5 +1,6 @@
 import "./popular.scss"
 import Row from "../../components/Row/Row"
+import ContinueWatchingRow from "../../components/ContinueWatchingRow/ContinueWatchingRow"
 import Credits from "../../components/Credits/Credits";
 import { useRetrieveData } from "../../hooks/useRetrieveData";
 import { motion } from "framer-motion";
@@ -16,6 +17,7 @@ const Popular = () => {
 			animate="animate"
 			exit="exit"
 		>
+			<ContinueWatchingRow mediaType="movie" />
 			{rows && rows.map(props => (
 				<Row key={props.id} {...props} />
 			))}

@@ -2,9 +2,34 @@ import axios from "../../axiosInstance";
 
 import { moviesActionTypes } from "./movies.types";
 // movies.actions.js
-import { mockRecommendations } from "./mockRecommendations";
-import { mockHistory } from "./mockhistory";
-import { getIdToken } from "../../firebase/firebaseUtils";
+import { getLocalRecommendations } from "../recommendations/recommendationEngine";
+
+// Rows that can feed the local recommender. `recommendations` and `history` are
+// intentionally excluded so the engine does not learn from its own output.
+const MOVIE_ROW_KEYS = [
+  "actionMovies",
+  "adventureMovies",
+  "animationMovies",
+  "comedyMovies",
+  "horrorMovies",
+  "netflixMovies",
+  "romanceMovies",
+  "topRatedMovies",
+  "trendingMovies",
+  "upcomingMovies",
+  "latestMovies",
+];
+
+const collectLoadedRows = (state) =>
+  MOVIE_ROW_KEYS.flatMap((key) => state.movies?.[key]?.data || []);
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const resolveIsPage = (arg, isPageArg) => {
+  if (typeof arg === "boolean") return arg;
+  if (typeof isPageArg === "boolean") return isPageArg;
+  return true;
+};
 
 // Action creators
 export const fetchRecommendationsRequest = () => ({
@@ -23,52 +48,46 @@ export const fetchRecommendationsFailure = (error) => ({
   payload: error,
 });
 
-export const fetchRecommendations = (isPage = true) => {
-  return async (dispatch) => {
+export const fetchRecommendations = (arg, isPageArg) => {
+  return async (dispatch, getState) => {
+    const isPage = resolveIsPage(arg, isPageArg);
     dispatch(fetchRecommendationsRequest());
 
-    const token = await getIdToken();
-    if (!token) return; // user not logged in
-
     try {
-      // Call your backend endpoint
-      const response = await fetch("https://flixcinema.onrender.com/AIrecommendations", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      let recommendations = [];
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      // Rows load in parallel. On a first visit the localStorage catalogue can
+      // still be empty when this thunk runs, so retry briefly instead of
+      // rendering an empty row.
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        const state = getState();
+        recommendations = getLocalRecommendations({
+          mediaType: "movie",
+          candidates: collectLoadedRows(state),
+          historyItems: state.history?.items || [],
+          favouriteItems: state.favourites?.favouritesList || [],
+          seenKeys: state.history?.seenKeys || [],
+          limit: 24,
+        });
 
-      const data = await response.json();
-
-      // The backend returns { recommended: [...] }
-      const recommendations = data.recommended.map((item) => ({
-        ...item,
-        isFavourite: false,
-        media_type: item.media_type || "movie",
-      }));
+        // A full row is ideal; after the first retry take whatever the catalogue
+        // has so a small library does not keep the skeleton visible.
+        if (
+          recommendations.length >= 12 ||
+          (recommendations.length > 0 && attempt > 0)
+        ) {
+          break;
+        }
+        await wait(400);
+      }
 
       dispatch(fetchRecommendationsSuccess(recommendations, isPage));
     } catch (error) {
-      console.warn("API failed, using mock data:", error.message);
-
-      // Fallback to mock data
-      try {
-        const mockData = mockRecommendations.results || [];
-        const recommendations = mockData.map((item) => ({
-          ...item,
-          isFavourite: false,
-          media_type: item.media_type || "movie",
-        }));
-
-        dispatch(fetchRecommendationsSuccess(recommendations, isPage, true));
-      } catch (mockError) {
-        console.error("Mock data failed:", mockError);
-        dispatch(fetchRecommendationsFailure("Failed to load recommendations"));
-      }
+      dispatch(
+        fetchRecommendationsFailure(
+          error.message || "Failed to build local recommendations"
+        )
+      );
     }
   };
 };
@@ -91,52 +110,23 @@ export const fetchHistoryFailure = (error) => ({
   payload: error,
 });
 
-export const fetchhistory = (isPage = true) => {
-  return async (dispatch) => {
+export const fetchhistory = (arg, isPageArg) => {
+  return (dispatch, getState) => {
+    const isPage = resolveIsPage(arg, isPageArg);
     dispatch(fetchHistoryRequest());
 
-    const token = await getIdToken();
-    if (!token) return; // user not logged in
-
     try {
-      // Call your backend endpoint
-      const response = await fetch("https://flixcinema.onrender.com/history", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      // Watch progress already lives in localStorage (redux-persist), so there
+      // is no server history endpoint to call any more.
+      const history = (getState().history?.items || [])
+        .filter((item) => item.media_type === "movie")
+        .map((item) => ({ ...item, isFavourite: false }));
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const data = await response.json();
-
-      // The backend returns { recommended: [...] }
-      const recommendations = data.recommended.map((item) => ({
-        ...item,
-        isFavourite: false,
-        media_type: item.media_type || "movie",
-      }));
-
-      dispatch(fetchHistorySuccess(recommendations, isPage));
+      dispatch(fetchHistorySuccess(history, isPage));
     } catch (error) {
-      console.warn("API failed, using mock data:", error.message);
-
-      // Fallback to mock data
-      try {
-        const mockData = mockHistory.results || [];
-        const recommendations = mockData.map((item) => ({
-          ...item,
-          isFavourite: false,
-          media_type: item.media_type || "movie",
-        }));
-
-        dispatch(fetchHistorySuccess(recommendations, isPage, true));
-      } catch (mockError) {
-        console.error("Mock data failed:", mockError);
-        dispatch(fetchHistoryFailure("Failed to load recommendations"));
-      }
+      dispatch(
+        fetchHistoryFailure(error.message || "Failed to read local history")
+      );
     }
   };
 };

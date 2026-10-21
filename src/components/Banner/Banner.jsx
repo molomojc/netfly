@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { staggerOne, bannerFadeInLoadSectionVariants, bannerFadeInVariants, bannerFadeInUpVariants } from "../../motionUtils";
 import { BASE_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
-import { FaPlay } from "react-icons/fa";
+import { FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import { BiInfoCircle } from "react-icons/bi";
 import { randomize, truncate } from "../../utils";
 import { useHistory } from "react-router-dom";
@@ -19,7 +19,11 @@ const Banner = ({ type }) => {
     const [loadingTrailer, setLoadingTrailer] = useState(false);
     const [error, setError] = useState(null);
     const [currentBannerData, setCurrentBannerData] = useState(null);
+    // Hero trailers start muted: browsers only guarantee autoplay for muted
+    // video, and this iframe mounts after the splash redirect without a click.
+    const [isMuted, setIsMuted] = useState(true);
     const dataRef = useRef(null);
+    const iframeRef = useRef(null);
     
     let selector;
     let isTv = false;
@@ -51,6 +55,7 @@ const Banner = ({ type }) => {
                 // Reset trailer state when banner data changes
                 setTrailerUrl(null);
                 setError(null);
+                setIsMuted(true);
             }
         }
     }, [results]);
@@ -81,7 +86,7 @@ const Banner = ({ type }) => {
         setError(null);
         
         try {
-            const url = await fetchTrailerUrl(id, mediaType);
+            const url = await fetchTrailerUrl(id, mediaType, { muted: true });
             if (url) {
                 setTrailerUrl(url);
             } else {
@@ -105,12 +110,50 @@ const Banner = ({ type }) => {
         event.stopPropagation();
         history.push({
             pathname: '/play',
-            state: {fallbackTitle, id, isTv, Season, Episode },
+            state: {
+                fallbackTitle,
+                id,
+                isTv,
+                Season,
+                Episode,
+                media_type: mediaType,
+                poster_path: currentBannerData?.poster_path,
+                backdrop_path: currentBannerData?.backdrop_path,
+                // Used by the local recommendation engine's taste profile.
+                genre_ids: currentBannerData?.genre_ids,
+                vote_average: currentBannerData?.vote_average,
+                original_language: currentBannerData?.original_language,
+                release_date: currentBannerData?.release_date,
+                first_air_date: currentBannerData?.first_air_date,
+                overview: currentBannerData?.overview,
+            },
         });
     };
 
     const handleModalOpening = () => {
         dispatch(showModalDetail({ ...currentBannerData, fallbackTitle, media_type: mediaType }));
+    };
+
+    const isYouTubeTrailer = Boolean(
+        trailerUrl && trailerUrl.includes("youtube.com/embed")
+    );
+
+    const handleToggleMute = () => {
+        const player = iframeRef.current?.contentWindow;
+        if (!isYouTubeTrailer || !player) return;
+
+        const nextMuted = !isMuted;
+        // YouTube's embed API accepts these commands over postMessage when the
+        // URL contains enablejsapi=1, so the trailer does not need to reload.
+        player.postMessage(
+            JSON.stringify({
+                event: "command",
+                func: nextMuted ? "mute" : "unMute",
+                args: [],
+            }),
+            "*"
+        );
+        setIsMuted(nextMuted);
     };
 
     return (
@@ -145,6 +188,7 @@ const Banner = ({ type }) => {
                     ) : trailerUrl ? (
                         <div className="Banner__trailer--container">
                             <iframe
+                                ref={iframeRef}
                                 src={trailerUrl}
                                 title={`${fallbackTitle} Trailer`}
                                 frameBorder="0"
@@ -153,7 +197,6 @@ const Banner = ({ type }) => {
                                 className="Banner__trailer--iframe"
                                 width="100%"
                                 height="100%"
-                                loading="lazy"
                                 style={{ border: 'none' }}
                             />
                         </div>
@@ -194,6 +237,17 @@ const Banner = ({ type }) => {
                         </motion.div>
                         <motion.p variants={bannerFadeInUpVariants} className="Banner__content--description">{description}</motion.p>
                     </motion.div>
+                    {trailerUrl && isYouTubeTrailer && (
+                        <button
+                            type="button"
+                            className="Banner__mute"
+                            onClick={handleToggleMute}
+                            aria-label={isMuted ? "Unmute trailer" : "Mute trailer"}
+                            title={isMuted ? "Unmute trailer" : "Mute trailer"}
+                        >
+                            {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+                        </button>
+                    )}
                     <div className="Banner__panel" />
                     <div className="Banner__bottom-shadow" />
                 </motion.header>

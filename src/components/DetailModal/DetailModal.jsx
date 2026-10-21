@@ -140,7 +140,7 @@ const DetailModal = () => {
         dispatch(hideModalDetail());
     };
 
-    const { overview, fallbackTitle, backdrop_path, release_date, first_air_date, vote_average, original_language, adult, genresConverted, isFavourite, id, media_type } = modalContent || {};
+    const { overview, fallbackTitle, backdrop_path, poster_path, release_date, first_air_date, vote_average, original_language, adult, genresConverted, isFavourite, id, media_type, genre_ids } = modalContent || {};
     const joinedGenres = genresConverted ? genresConverted.join(', ') : "Not available";
     const maturityRating = adult === undefined ? "Not available" : adult ? "Suitable for adults only" : "Suitable for all ages";
     const reducedDate = release_date ? dateToYearOnly(release_date) : first_air_date ? dateToYearOnly(first_air_date) : "Not Available";
@@ -166,8 +166,24 @@ const DetailModal = () => {
         event.stopPropagation();
         handleModalClose();
         history.push({
-            pathname: "/Play",
-            state: {fallbackTitle, id, isTv,Season,Episode }, // Pass the ID and isTv flag
+            pathname: "/play",
+            state: {
+                fallbackTitle,
+                id,
+                isTv,
+                Season,
+                Episode,
+                media_type: mediaType,
+                poster_path,
+                backdrop_path,
+                // Used by the local recommendation engine's taste profile.
+                genre_ids,
+                vote_average,
+                original_language,
+                release_date,
+                first_air_date,
+                overview,
+            }, // Pass the ID and isTv flag
         });
     };
 
@@ -306,7 +322,14 @@ const DetailModal = () => {
 
     <Episodes 
       tvId={id} 
-      seasonNumber={selectedSeason} 
+      seasonNumber={selectedSeason}
+      title={fallbackTitle}
+      posterPath={poster_path}
+      backdropPath={backdrop_path}
+      genreIds={genre_ids}
+      voteAverage={vote_average}
+      originalLanguage={original_language}
+      releaseDate={release_date || first_air_date}
     />
   </>
 )}
