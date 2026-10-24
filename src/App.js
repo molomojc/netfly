@@ -80,6 +80,16 @@ const update = (
 */
 
 
+
+
+// Helper to normalize animation keys for player routes that auto-redirect
+// This prevents AnimatePresence from showing both splash and player simultaneously
+const getAnimationKey = (pathname) => {
+  if (pathname === '/play' || pathname === '/PlayMovie') return 'player';
+  if (pathname === '/playSport' || pathname === '/PlaySports') return 'player-sport';
+  return pathname;
+};
+
 const App = () => {
     const currentUser = useSelector(selectCurrentUser);
     const searchResults = useSelector(selectSearchResults);
@@ -111,7 +121,7 @@ const App = () => {
                 </>
             )}
             <AnimatePresence exitBeforeEnter>
-                <Switch location={location} key={location.pathname}>
+                <Switch location={location} key={getAnimationKey(location.pathname)}>
                     <Route exact path="/">
                         <Redirect to="/login" />
                     </Route>
