@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useStore } from "react-redux";
 import { FaCheck, FaChevronDown, FaClosedCaptioning, FaCog, FaDownload, FaForward, FaBackward, FaArrowLeft, FaList } from "react-icons/fa";
 import Hls from "hls.js";
 import {
@@ -22,6 +22,7 @@ import { updateWatchProgress } from "../../redux/history/history.actions";
 import { formatTime } from "../../redux/history/history.utils";
 import Loader from "../Loader/Loader";
 import StreamLoader from "../StreamLoader/StreamLoader";
+import { isTvDevice } from "../../utils";
 
 const EXTRACTOR_URL = process.env.REACT_APP_EXTRACTOR_URL || "http://localhost:3001";
 const USE_DIRECT_STREAM = process.env.REACT_APP_USE_DIRECT_STREAM === "true";
@@ -36,6 +37,46 @@ const SERVER_OPTIONS = [
 
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
+// ---------------------------------------------------------------------------
+// Playback tuning
+//
+// Android TV / Fire TV boxes have weak CPUs and very little RAM. Keep the
+// forward buffer short, release the back buffer, and never start at a level
+// the display can't reasonably decode.
+// ---------------------------------------------------------------------------
+const HLS_CONFIG = {
+  enableWorker: true,
+  // `lowLatencyMode` targets LL-HLS live streams. On VOD it only adds
+  // constraints and delays startup, so it must stay off on TV.
+  lowLatencyMode: false,
+  // Free already-played fragments instead of holding the whole movie in RAM.
+  backBufferLength: 30,
+  maxBufferLength: 30,
+  maxMaxBufferLength: 60,
+  maxBufferSize: 30 * 1000 * 1000,
+  // Never pick a rendition larger than the rendered player, and start the
+  // adaptive estimate conservatively so a 1 GB box doesn't open at 1080p.
+  capLevelToPlayerSize: true,
+  abrEwmaDefaultEstimate: 800 * 1000,
+  fragLoadingMaxRetry: 4,
+  manifestLoadingMaxRetry: 4,
+};
+
+// Chrome/WebView on Android TV exposes the platform HLS stack, which decodes
+// in hardware and costs almost no JavaScript. Prefer it and fall back to
+// hls.js only when it's genuinely unavailable. `?engine=hls` (or
+// REACT_APP_FORCE_HLS=true) forces the MSE path for A/B testing.
+const FORCE_HLS = process.env.REACT_APP_FORCE_HLS === "true";
+
+const prefersNativeHls = () => {
+  if (FORCE_HLS) return false;
+  try {
+    return new URLSearchParams(window.location.search).get("engine") !== "hls";
+  } catch (err) {
+    return true;
+  }
+};
+
 // Turn a 3-letter subtitle code ("eng") into a readable language name.
 function languageLabel(code) {
   if (!code) return "Unknown";
@@ -48,8 +89,10 @@ function languageLabel(code) {
   }
 }
 
-// How often a new position is written to localStorage while playing.
-const PROGRESS_WRITE_INTERVAL = 5000;
+// How often a new position is written while playing. Each write also
+// serialises the whole persisted slice, so keep it infrequent and flush on
+// pause / hide / unmount instead.
+const PROGRESS_WRITE_INTERVAL = 15000;
 // Don't bother seeking for the first few seconds of a title.
 const MIN_RESUME_SECONDS = 5;
 
@@ -57,6 +100,9 @@ const PlayMovie = () => {
   const location = useLocation();
   const history = useHistory();
   const dispatch = useDispatch();
+  // Reading the store directly (instead of useSelector) keeps this component
+  // from re-rendering every time a progress update is persisted mid-playback.
+  const store = useStore();
 
   const {
     fallbackTitle,
@@ -93,6 +139,8 @@ const PlayMovie = () => {
   const [isLoading, setIsLoading] = useState(Boolean(USE_DIRECT_STREAM && id));
   const [error, setError] = useState(null);
   const [resumedAt, setResumedAt] = useState(0);
+  // Start on the platform HLS player, drop to hls.js only if it fails.
+  const [useNativeEngine, setUseNativeEngine] = useState(prefersNativeHls);
 
   // Episode selector state
   const [episodesData, setEpisodesData] = useState({});
@@ -114,15 +162,12 @@ const PlayMovie = () => {
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const savedEntry = useSelector((state) =>
-    selectHistoryEntry(state, id, mediaType)
-  );
-
   // The position the player should start at: an explicit value handed over by
   // the "Continue Watching" row wins, otherwise the saved entry for this exact
   // episode is used.
   const initialResumeRef = useRef(undefined);
   if (initialResumeRef.current === undefined) {
+    const savedEntry = selectHistoryEntry(store.getState(), id, mediaType);
     const sameEpisode =
       !savedEntry ||
       (savedEntry.season === currentSeason &&
@@ -139,8 +184,8 @@ const PlayMovie = () => {
   // Always kept up to date so a quality switch (which re-mounts the media
   // element) resumes where the viewer actually was, not where they started.
   const positionRef = useRef(initialResumeRef.current);
+  const durationRef = useRef(0);
   const lastWriteRef = useRef(0);
-  const pendingEntryRef = useRef(null);
 
   const [showOverlay, setShowOverlay] = useState(true);
   const INACTIVITY_TIMEOUT = 30000; // 30 seconds
@@ -265,33 +310,36 @@ const PlayMovie = () => {
   /* Continue watching: persist playback position to localStorage        */
   /* ------------------------------------------------------------------ */
 
+  // Build the "Continue Watching" entry from refs, so a timeupdate tick does
+  // no allocation and no Redux/persist work unless we actually write.
   const persistProgress = useCallback(
-    (state, force = false) => {
-      if (!state || !id || !state.duration) return;
-
-      const entry = {
-        id,
-        media_type: mediaType,
-        title: fallbackTitle,
-        poster_path,
-        backdrop_path,
-        genre_ids: itemGenreIds,
-        vote_average,
-        original_language,
-        release_date: release_date || first_air_date,
-        season: currentSeason,
-        episode: currentEpisode,
-        currentTime: state.playedSeconds || 0,
-        duration: state.duration,
-      };
-
-      pendingEntryRef.current = entry;
+    (force = false) => {
+      const duration = durationRef.current;
+      if (!id || !duration) return;
 
       const now = Date.now();
-      if (force || now - lastWriteRef.current >= PROGRESS_WRITE_INTERVAL) {
-        lastWriteRef.current = now;
-        dispatch(updateWatchProgress(entry));
+      if (!force && now - lastWriteRef.current < PROGRESS_WRITE_INTERVAL) {
+        return;
       }
+      lastWriteRef.current = now;
+
+      dispatch(
+        updateWatchProgress({
+          id,
+          media_type: mediaType,
+          title: fallbackTitle,
+          poster_path,
+          backdrop_path,
+          genre_ids: itemGenreIds,
+          vote_average,
+          original_language,
+          release_date: release_date || first_air_date,
+          season: currentSeason,
+          episode: currentEpisode,
+          currentTime: positionRef.current || 0,
+          duration,
+        })
+      );
     },
     [
       dispatch,
@@ -310,14 +358,11 @@ const PlayMovie = () => {
     ]
   );
 
-  // Flush the last known position when the page is closed or the player unmounts.
+  // Flush the last known position when the page is closed or the player
+  // unmounts. This is the only place progress is written outside the
+  // throttled interval above.
   useEffect(() => {
-    const flush = () => {
-      if (pendingEntryRef.current) {
-        dispatch(updateWatchProgress(pendingEntryRef.current));
-        pendingEntryRef.current = null;
-      }
-    };
+    const flush = () => persistProgress(true);
 
     const handleVisibility = () => {
       if (document.visibilityState === "hidden") flush();
@@ -331,15 +376,7 @@ const PlayMovie = () => {
       window.removeEventListener("beforeunload", flush);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [dispatch]);
-
-  const handleProgress = (e) => {
-    const video = e.target;
-    if (video && typeof video.currentTime === "number") {
-      positionRef.current = video.currentTime;
-      persistProgress({ playedSeconds: video.currentTime, duration: video.duration });
-    }
-  };
+  }, [persistProgress]);
 
   // Attach the selected source to the <video> element. This must run from an
   // effect (not from onLoadedData): nothing loads the media otherwise, so
@@ -363,11 +400,62 @@ const PlayMovie = () => {
 
     const isHLS = directStreamUrl.includes(".m3u8");
 
+    const tryPlay = () => {
+      // Check if component is still mounted and video is in document.
+      if (!isMountedRef.current || !video.isConnected) return;
+      const playPromise = video.play();
+      if (playPromise?.catch) playPromise.catch(() => {});
+    };
+
+    const canPlayNativeHls =
+      isHLS &&
+      useNativeEngine &&
+      // `canPlayType` is authoritative where it answers, but some Android TV
+      // builds route HLS through the platform player without advertising it.
+      (video.canPlayType("application/vnd.apple.mpegurl") ||
+        (isTvDevice() && /Android/i.test(navigator.userAgent || "")));
+
+    if (canPlayNativeHls) {
+      // Android TV / iOS: hand the playlist to the platform player. Decoding
+      // happens in hardware and hls.js's demuxer never touches the main thread.
+      console.info("[Player] Native HLS playback");
+      video.src = directStreamUrl;
+
+      const onNativeMeta = () => {
+        resumeFrom();
+        tryPlay();
+      };
+
+      const fallbackToHlsJs = () => {
+        if (Hls.isSupported()) {
+          console.warn("[Player] Native HLS failed, retrying with hls.js");
+          setUseNativeEngine(false);
+        } else {
+          setDirectStreamUrl(null);
+          setError("Stream failed to load");
+        }
+      };
+
+      // Some platform players fail silently (no error event, never load).
+      const watchdog = setTimeout(() => {
+        if (video.readyState === 0) fallbackToHlsJs();
+      }, 10000);
+
+      video.addEventListener("loadedmetadata", onNativeMeta, { once: true });
+      video.addEventListener("error", fallbackToHlsJs);
+
+      return () => {
+        clearTimeout(watchdog);
+        video.removeEventListener("loadedmetadata", onNativeMeta);
+        video.removeEventListener("error", fallbackToHlsJs);
+        video.removeAttribute("src");
+        video.load();
+      };
+    }
+
     if (isHLS && Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-      });
+      console.info("[Player] hls.js playback");
+      const hls = new Hls(HLS_CONFIG);
 
       video.hls = hls;
       hls.loadSource(directStreamUrl);
@@ -375,11 +463,7 @@ const PlayMovie = () => {
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         resumeFrom();
-        // Check if component is still mounted and video is in document before playing
-        if (isMountedRef.current && video.isConnected) {
-          const playPromise = video.play();
-          if (playPromise?.catch) playPromise.catch(() => {});
-        }
+        tryPlay();
       });
 
       hls.on(Hls.Events.ERROR, (event, data) => {
@@ -402,23 +486,50 @@ const PlayMovie = () => {
       };
     }
 
-    // MP4 (or native HLS where supported): let the browser handle it.
+    // MP4 (or HLS the browser handles directly): let the browser play it.
     video.src = directStreamUrl;
     const onLoadedMeta = () => {
       resumeFrom();
-      if (isMountedRef.current && video.isConnected) {
-        const playPromise = video.play();
-        if (playPromise?.catch) playPromise.catch(() => {});
-      }
+      tryPlay();
+    };
+    const onError = () => {
+      setDirectStreamUrl(null);
+      setError("Stream failed to load");
     };
     video.addEventListener("loadedmetadata", onLoadedMeta, { once: true });
+    video.addEventListener("error", onError);
 
     return () => {
       video.removeEventListener("loadedmetadata", onLoadedMeta);
+      video.removeEventListener("error", onError);
       video.removeAttribute("src");
       video.load();
     };
-  }, [directStreamUrl]);
+  }, [directStreamUrl, useNativeEngine]);
+
+  // Track position with a plain DOM listener. React's synthetic event path
+  // dispatches ~4x/second for no benefit, and every write re-renders nothing
+  // now that the component no longer subscribes to the history slice.
+  useEffect(() => {
+    const video = playerRef.current;
+    if (!video) return undefined;
+
+    const onTimeUpdate = () => {
+      positionRef.current = video.currentTime;
+      if (video.duration) durationRef.current = video.duration;
+      persistProgress(false);
+    };
+
+    const flushOnPause = () => persistProgress(true);
+
+    video.addEventListener("timeupdate", onTimeUpdate, { passive: true });
+    video.addEventListener("pause", flushOnPause);
+
+    return () => {
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("pause", flushOnPause);
+    };
+  }, [directStreamUrl, persistProgress]);
 
   // Hide the "resuming" badge after a few seconds.
   useEffect(() => {
@@ -615,8 +726,8 @@ const PlayMovie = () => {
         </div>
 
         {directStreamUrl ? (
-          // Direct stream via native video + Hls.js + media-chrome (no ads, native controls)
-          <div style={{ width: "100%", height: "640px", position: "relative" }}>
+          // Direct stream: platform HLS player when available, hls.js otherwise.
+          <div className="player-frame">
             <MediaController style={{ width: "100%", height: "100%", background: "#000", borderRadius: "4px" }}>
               <video
                 ref={playerRef}
@@ -624,11 +735,6 @@ const PlayMovie = () => {
                 style={{ width: "100%", height: "100%" }}
                 crossOrigin="anonymous"
                 preload="auto"
-                onError={(e) => {
-                  console.error("[Video] Playback error:", e);
-                  setDirectStreamUrl(null); // Fallback to iframe
-                }}
-                onTimeUpdate={handleProgress}
               >
                 {subtitleTracks.map((subtitle) => (
                   <track
@@ -672,7 +778,7 @@ const PlayMovie = () => {
               allowFullScreen
               frameBorder="0"
               title={`${isTv ? "TV Show" : "Movie"} Player`}
-              style={{ width: "100%", height: "640px", overflow: "hidden" }}
+              className="player-frame"
               referrerPolicy="no-referrer"
             />
             {showOverlay && (

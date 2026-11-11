@@ -1,10 +1,25 @@
 .PlayMovie__wrp {
     // The navbar is fixed and 70px tall.
+    --player-height: 640px;
     padding-top: 84px;
 
     .video-container {
         position: relative;
         width: 100%;
+    }
+
+    .player-frame {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: var(--player-height);
+        border: 0;
+        overflow: hidden;
+    }
+
+    // Shorter screens (laptops, 720p TVs): never let the player scroll.
+    @media (max-height: 780px) {
+        --player-height: calc(100vh - 140px);
     }
 
     /* Now Playing overlay pinned to the top-left of the video */
@@ -737,5 +752,27 @@
     .player-tool__panel--episodes {
         width: 280px;
         right: -20px;
+    }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Android TV / Fire TV: weak GPUs composite `backdrop-filter` in software. */
+/* Dropping the blur removes a full-screen composite pass per overlay.     */
+/* ---------------------------------------------------------------------- */
+.is-tv-device .PlayMovie__wrp {
+    // Use the whole screen instead of the 640px desktop cap.
+    --player-height: calc(100vh - 140px);
+
+    .now-playing-info,
+    .player-tool__btn,
+    .player-tool__panel,
+    .server-menu__toggle,
+    .server-menu__list,
+    .now-playing-label,
+    .nav-button,
+    .resume-badge {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
     }
 }
