@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react"
-import { useDispatch } from "react-redux"
 import { fetchMovieDataConfig, fetchPopularDataConfig, fetchSeriesDataConfig} from "../dataConfig";
 
 //
 // [...fetchMovieDataConfig, fetchRecommendationsConfig];
 export const useRetrieveData = (type) => {
 
-    const dispatch = useDispatch()
     const [data, setData] = useState(null)
 
     useEffect(() => {
@@ -25,20 +23,20 @@ export const useRetrieveData = (type) => {
                 break;
         }
 
-        let isPage = true;
         const rowsData = selectedConfigArray.map(el => {
-            dispatch(el.thunk(el.url, isPage))
             return {
                 id: el.id,
                 title: el.title,
                 genre: el.genre,
                 selector: el.selector,
-                isLarge: el.isLarge
+                isLarge: el.isLarge,
+                thunk: el.thunk,
+                url: el.url,
             }
         })
         setData(rowsData)
 
-    }, [type, dispatch])
+    }, [type])
 
     return data
 }

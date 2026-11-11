@@ -35,7 +35,7 @@ https://user-images.githubusercontent.com/25078541/123811962-01474580-d8f4-11eb-
 I have started this project with the purpose of learning how to structure a Web App of a mid-level complexity integrating the Redux logic.<br/>
 I've tried to replicate the original layout as much as possible and I've also made some improvements in some sections inserting route animations and micro-interactions. I've also inserted a really close clone of Netflix's original splash animation (forked from a famous [codepen from Claudio Bonfati](https://codepen.io/claudio_bonfati/pen/mdryxPv)), made entirely with CSS, as well as the play animation. I have then sampled the original Netflix "ta-duummm" sound and I made it play along with the two animations.<br/>
 I put a lot of effort into it and I hope that you could like it.<br/><br/>
-The Web App redirects you to an authentication page, in which you can choose to sign up or to sign in: you can sign in with your custom account or with your Google account. Once you are logged in and after the splash animation, you will land on the homepage, in which you can find a mix of movies and series divided into rows.<br/>
+The app opens directly to the public browse experience, where you can find movies and series divided into rows.<br/>
 Each row represents a movie/series category: you can click on it and you will be redirected to the selected category, a page that loads thousands of movies with an infinite scroll. You can also navigate to the movies page, series page, new & popular page (that contains the upcoming movies/series and the most popular ones) or you can navigate to your favorites page.<br/>
 You can add/remove movies/series through the plus and minus buttons that you can find hovering each poster or opening a single movie's detail modal. If you click on the play button you can enjoy a custom CSS-only play animation with Fakeflix's brand name.<br/>
 You have also the option to search through TMDB's catalogue using the search functionality inside the fixed navbar: you can search by movie name, actor or movie director.<br/><br/>
@@ -49,13 +49,6 @@ Here you can find the demo link:
 
 - [Demo](https://fakeflix.th3wall.codes)
 
-### Test credentials (for lazy users 😓)
-
-> Email: fakeflixuser@test.com<br/>
-> Password: FakeflixTest<br/>
-
-I have also added a button that lets you sign in anonymously.
-
 <br/>
 
 ## :sparkles: Features
@@ -67,8 +60,6 @@ I have also added a button that lets you sign in anonymously.
 :heavy_check_mark: &nbsp;&nbsp;Detail modal with extra informations about the selected movie/series<br />
 :heavy_check_mark: &nbsp;&nbsp;Customized splash animation (credits: [Claudio Bonfati's pen](https://codepen.io/claudio_bonfati/pen/mdryxPv)) with characteristic Netflix sound<br />
 :heavy_check_mark: &nbsp;&nbsp;Play animation with characteristic Netflix sound<br />
-:heavy_check_mark: &nbsp;&nbsp;Google login<br />
-:heavy_check_mark: &nbsp;&nbsp;User Sign In & User Sign Up<br />
 :heavy_check_mark: &nbsp;&nbsp;Use of React hooks and custom hooks<br />
 :heavy_check_mark: &nbsp;&nbsp;Favourites list persistence (session storage)<br />
 :heavy_check_mark: &nbsp;&nbsp;Responsive layout<br />
@@ -109,14 +100,6 @@ I have also added a button that lets you sign in anonymously.
 <br/>
 
 ## 📸 Screenshots
-
-**Sign In**
-![Screenshot of Fakeflix Sign In](https://cdn.jsdelivr.net/gh/Th3Wall/assets-cdn/Fakeflix/screenshots/Fakeflix_SignIn.jpg)
-<br/>
-
-**Sign Up**
-![Screenshot of Fakeflix Sign Up](https://cdn.jsdelivr.net/gh/Th3Wall/assets-cdn/Fakeflix/screenshots/Fakeflix_SignUp.jpg)
-<br/>
 
 **Homepage**
 ![Screenshot of Fakeflix Homepage](https://cdn.jsdelivr.net/gh/Th3Wall/assets-cdn/Fakeflix/screenshots/Fakeflix_Home.jpg)
@@ -166,20 +149,6 @@ https://user-images.githubusercontent.com/25078541/123811962-01474580-d8f4-11eb-
 REACT_APP_API_KEY=REACT_APP_API_KEY
 ```
 
-- Create a project inside Google Firebase and export the configuration
-
-- Add the configuration inside the .env file created previously
-
-```
-REACT_APP_FIREBASE_API_KEY=REACT_APP_FIREBASE_API_KEY
-REACT_APP_FIREBASE_AUTH_DOMAIN=REACT_APP_FIREBASE_AUTH_DOMAIN
-REACT_APP_FIREBASE_PROJECT_ID=REACT_APP_FIREBASE_PROJECT_ID
-REACT_APP_FIREBASE_STORAGE_BUCKET=REACT_APP_FIREBASE_STORAGE_BUCKET
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=REACT_APP_FIREBASE_MESSAGING_SENDER_ID
-REACT_APP_FIREBASE_APP_ID=REACT_APP_FIREBASE_APP_ID
-REACT_APP_FIREBASE_MEASUREMEMT_ID=REACT_APP_FIREBASE_MEASUREMEMT_ID
-```
-
 - Start the server
 
 ```bash
@@ -203,6 +172,5 @@ Before starting :checkered_flag:, you need to have [Git](https://git-scm.com) an
 ## ⭐ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Th3Wall/Fakeflix&type=Date)](https://star-history.com/#Th3Wall/Fakeflix&Date)
-
 
 <a href="https://www.buymeacoffee.com/th3wall" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="41" width="174" alt="Buy Me A Coffee" /></a>

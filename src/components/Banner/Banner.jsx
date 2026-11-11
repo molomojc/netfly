@@ -2,10 +2,10 @@ import "./banner.scss";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { staggerOne, bannerFadeInLoadSectionVariants, bannerFadeInVariants, bannerFadeInUpVariants } from "../../motionUtils";
-import { BASE_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
+import { BACKDROP_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
 import { FaPlay, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import { BiInfoCircle } from "react-icons/bi";
-import { randomize, truncate } from "../../utils";
+import { isTvDevice, randomize, truncate } from "../../utils";
 import { useHistory } from "react-router-dom";
 import SkeletonBanner from "../SkeletonBanner/SkeletonBanner";
 import { useDispatch, useSelector } from "react-redux";
@@ -101,8 +101,10 @@ const Banner = ({ type }) => {
     }, [id, mediaType]);
 
     useEffect(() => {
-        if (id) {
+        if (id && !isTvDevice()) {
             fetchTrailer();
+        } else {
+            setLoadingTrailer(false);
         }
     }, [id, fetchTrailer]);
 
@@ -176,8 +178,10 @@ const Banner = ({ type }) => {
                     animate='animate'
                     exit='exit'
                     className="Banner"
-                    style={!trailerUrl ? { 
-                        backgroundImage: `url(${BASE_IMG_URL}/${currentBannerData?.backdrop_path || FALLBACK_IMG_URL})` 
+                    style={!trailerUrl ? {
+                        backgroundImage: currentBannerData?.backdrop_path
+                            ? `url(${BACKDROP_IMG_URL}/${currentBannerData.backdrop_path})`
+                            : `url(${FALLBACK_IMG_URL})`
                     } : {}}
                 >
                     {/* Trailer or fallback content */}
@@ -205,7 +209,9 @@ const Banner = ({ type }) => {
                             <div 
                                 className="Banner__image"
                                 style={{ 
-                                    backgroundImage: `url(${BASE_IMG_URL}/${currentBannerData?.backdrop_path || FALLBACK_IMG_URL})` 
+                                    backgroundImage: currentBannerData?.backdrop_path
+                                        ? `url(${BACKDROP_IMG_URL}/${currentBannerData.backdrop_path})`
+                                        : `url(${FALLBACK_IMG_URL})`
                                 }}
                             />
                         </div>

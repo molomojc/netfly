@@ -1,7 +1,5 @@
 import "./poster.scss";
-import { motion } from "framer-motion";
-import { posterFadeInVariants } from "../../motionUtils";
-import { BASE_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
+import { ROW_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
 import { FaChevronDown, FaMinus, FaPlay, FaPlus } from "react-icons/fa";
 import useGenreConversion from "../../hooks/useGenreConversion";
 import { showModalDetail } from "../../redux/modal/modal.actions";
@@ -69,16 +67,15 @@ const Poster = ({ item, isFavourite }) => {
     };
 
     return (
-        <motion.div
-            variants={posterFadeInVariants}
+        <div
             className="Poster"
             onClick={handleModalOpening}
         >
             {backdrop_path ? (
-                <img src={`${BASE_IMG_URL}/${backdrop_path}`} alt={fallbackTitle} />
+                <img src={`${ROW_IMG_URL}/${backdrop_path}`} alt={fallbackTitle} loading="lazy" decoding="async" />
             ) : (
                 <>
-                    <img src={FALLBACK_IMG_URL} alt={fallbackTitle} />
+                    <img src={FALLBACK_IMG_URL} alt={fallbackTitle} loading="lazy" decoding="async" />
                     <div className="Poster__fallback">
                         <span>{fallbackTitle}</span>
                     </div>
@@ -116,7 +113,7 @@ const Poster = ({ item, isFavourite }) => {
                     ))}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 

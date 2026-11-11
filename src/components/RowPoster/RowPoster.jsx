@@ -1,5 +1,5 @@
 import "./rowPoster.scss";
-import { BASE_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
+import { ROW_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
 import { useDispatch } from "react-redux";
 import { addToFavourites, removeFromFavourites } from "../../redux/favourites/favourites.actions";
 import { FaPlus, FaMinus, FaPlay, FaChevronDown } from "react-icons/fa";
@@ -90,13 +90,13 @@ const RowPoster = ({ item, isLarge, isFavourite }) => {
         >
             {isLarge ? (
                 poster_path ? (
-                    <img src={`${BASE_IMG_URL}/${poster_path}`} alt={fallbackTitle} />
+                    <img src={`${ROW_IMG_URL}/${poster_path}`} alt={fallbackTitle} loading="lazy" decoding="async" />
                 ) : ""
             ) : backdrop_path ? (
-                <img src={`${BASE_IMG_URL}/${backdrop_path}`} alt={fallbackTitle} />
+                <img src={`${ROW_IMG_URL}/${backdrop_path}`} alt={fallbackTitle} loading="lazy" decoding="async" />
             ) : (
                 <>
-                    <img src={FALLBACK_IMG_URL} alt={fallbackTitle} />
+                    <img src={FALLBACK_IMG_URL} alt={fallbackTitle} loading="lazy" decoding="async" />
                     <div className="Row__poster__fallback">
                         <span>{fallbackTitle}</span>
                     </div>

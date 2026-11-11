@@ -14,3 +14,13 @@ body {
   background-color: $black;
   color: $white;
 }
+
+.is-tv-device body {
+  font-family: Arial, sans-serif;
+}
+
+.is-tv-device *,
+.is-tv-device *::before,
+.is-tv-device *::after {
+  scroll-behavior: auto !important;
+}

@@ -2,7 +2,7 @@ import "./myList.scss"
 import Poster from "../../components/Poster/Poster";
 import Credits from "../../components/Credits/Credits";
 import { motion } from "framer-motion";
-import { staggerHalf, defaultPageFadeInVariants } from "../../motionUtils";
+import { defaultPageFadeInVariants } from "../../motionUtils";
 import { useSelector } from "react-redux"
 import { selectFavouritesList } from "../../redux/favourites/favourites.selectors"
 
@@ -20,12 +20,8 @@ const MyList = () => {
             {favs && favs.length > 0 && (
                 <h2 className="MyList__title">My List</h2>
             )}
-            <motion.div
+            <div
                 className="MyList__wrp"
-                variants={staggerHalf}
-                initial="initial"
-                animate="animate"
-                exit="exit"
             >
                 {favs && favs.length > 0
                     ? favs.map(result => (
@@ -41,7 +37,7 @@ const MyList = () => {
                         </h2>
                     )
                 }
-            </motion.div>
+            </div>
             <Credits />
         </motion.div>
     )

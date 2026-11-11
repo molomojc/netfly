@@ -8,7 +8,7 @@ import SwiperCore, { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper.scss";
 import "swiper/components/navigation/navigation.scss";
-import { BASE_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
+import { ROW_IMG_URL, FALLBACK_IMG_URL } from "../../requests";
 import {
   formatMinutesLeft,
   removeFromHistory,
@@ -103,7 +103,7 @@ const ContinueWatchingRow = ({ mediaType, title = "Continue Watching" }) => {
           {items.map((item) => {
             const backdrop = item.backdrop_path || item.poster_path;
             const image = backdrop
-              ? `${BASE_IMG_URL}/${backdrop}`
+              ? `${ROW_IMG_URL}/${backdrop}`
               : FALLBACK_IMG_URL;
             const percent = Math.round((item.percent || 0) * 100);
 
@@ -117,7 +117,7 @@ const ContinueWatchingRow = ({ mediaType, title = "Continue Watching" }) => {
                   onClick={() => resume(item)}
                   onKeyDown={(event) => handleKeyDown(event, item)}
                 >
-                  <img src={image} alt={item.title} loading="lazy" />
+                  <img src={image} alt={item.title} loading="lazy" decoding="async" />
 
                   <div className="ContinueRow__card--scrim" />
 

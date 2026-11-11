@@ -1,26 +1,28 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const useLazyLoad = (customCallback) => {
     const endPageRef = useRef(null);
     const [ isIntersecting, setIsIntersecting ] = useState(false);
-    const currentRef = endPageRef.current;
-
-    const callbackFunction = useCallback((entries) => {
-        const [ entry ] = entries;
-        setIsIntersecting(entry.isIntersecting);
-
-        if (entry.isIntersecting) customCallback();
-
-    }, [customCallback])
+    const callbackRef = useRef(customCallback);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(callbackFunction)
-        if (currentRef) observer.observe(currentRef)
+        callbackRef.current = customCallback;
+    }, [customCallback]);
+
+    useEffect(() => {
+        const target = endPageRef.current;
+        if (!target || typeof IntersectionObserver === "undefined") return undefined;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            setIsIntersecting(entry.isIntersecting);
+            if (entry.isIntersecting && callbackRef.current) callbackRef.current();
+        }, { rootMargin: "300px 0px" });
+        observer.observe(target);
 
         return () => {
-            if(currentRef) observer.unobserve(currentRef)
+            observer.disconnect();
         }
-    }, [currentRef, callbackFunction])
+    }, [])
 
     return [endPageRef, isIntersecting];
 }

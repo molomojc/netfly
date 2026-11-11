@@ -3,6 +3,8 @@
 
 .Row {
     display: block;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
     padding: 1.5vh 0;
 
     @include mq('md'){
@@ -262,4 +264,13 @@
             }
         }
     }
+}
+
+// Keep remote-focusable cards usable, but avoid animating/scaling an entire
+// carousel on low-power TV browsers.
+.is-tv-device .Row .swiper-wrapper:hover .swiper-slide,
+.is-tv-device .Row .swiper-wrapper:hover .swiper-slide:hover {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
 }

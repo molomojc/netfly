@@ -6,7 +6,7 @@ import { staggerOne, modalOverlayVariants, modalVariants, modalFadeInUpVariants 
 import { hideModalDetail } from "../../redux/modal/modal.actions";
 import { useDispatch, useSelector } from "react-redux";
 import { selectModalContent, selectModalState } from "../../redux/modal/modal.selectors";
-import { BASE_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
+import { BACKDROP_IMG_URL, FALLBACK_IMG_URL, fetchTrailerUrl } from "../../requests";
 import { VscChromeClose } from "react-icons/vsc";
 import { capitalizeFirstLetter, dateToYearOnly } from "../../utils";
 import { FaMinus, FaPlay, FaPlus } from "react-icons/fa";
@@ -241,7 +241,7 @@ const DetailModal = () => {
                                 <div className="Modal__trailer--error">
                                     <img
                                         className="Modal__image--img"
-                                        src={backdrop_path ? `${BASE_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
+                                        src={backdrop_path ? `${BACKDROP_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
                                         alt={fallbackTitle}
                                     />
                                     <div className="Modal__trailer--error-message">
@@ -251,7 +251,7 @@ const DetailModal = () => {
                             ) : (
                                 <img
                                     className="Modal__image--img"
-                                    src={backdrop_path ? `${BASE_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
+                                    src={backdrop_path ? `${BACKDROP_IMG_URL}/${backdrop_path}` : FALLBACK_IMG_URL}
                                     alt={fallbackTitle}
                                 />
                             )}

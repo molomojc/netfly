@@ -50,10 +50,10 @@ const HLS_CONFIG = {
   // constraints and delays startup, so it must stay off on TV.
   lowLatencyMode: false,
   // Free already-played fragments instead of holding the whole movie in RAM.
-  backBufferLength: 30,
-  maxBufferLength: 30,
-  maxMaxBufferLength: 60,
-  maxBufferSize: 30 * 1000 * 1000,
+  backBufferLength: 15,
+  maxBufferLength: 20,
+  maxMaxBufferLength: 30,
+  maxBufferSize: 16 * 1000 * 1000,
   // Never pick a rendition larger than the rendered player, and start the
   // adaptive estimate conservatively so a 1 GB box doesn't open at 1080p.
   capLevelToPlayerSize: true,
@@ -77,6 +77,40 @@ const prefersNativeHls = () => {
   }
 };
 
+// Bump when the playback path changes so the debug HUD can prove which build
+// the TV is actually running (browsers cache aggressively).
+const PLAYER_BUILD = "tv-2";
+
+const URL_PARAMS = (() => {
+  try {
+    return new URLSearchParams(window.location.search);
+  } catch (err) {
+    return new URLSearchParams();
+  }
+})();
+
+// `?debug=1` draws an on-screen stats panel; `?quality=720` caps playback.
+const DEBUG = URL_PARAMS.get("debug") === "1";
+const LOW_MEMORY_ANDROID_TV = isTvDevice() && /Android/i.test(navigator.userAgent || "");
+const QUALITY_LOCK = Number(URL_PARAMS.get("quality")) || (LOW_MEMORY_ANDROID_TV ? 720 : 0);
+
+// Sources arrive best-quality-first with labels like "1080p" / "4K".
+const sourceHeight = (quality) => {
+  if (/4k/i.test(quality || "")) return 2160;
+  const match = /(\d{3,4})p/i.exec(quality || "");
+  return match ? Number(match[1]) : 0;
+};
+
+const pickSourceAtMost = (sources, maxHeight) => {
+  if (!maxHeight || !Array.isArray(sources) || sources.length === 0) return null;
+  const eligible = sources.filter((src) => {
+    const height = sourceHeight(src.quality);
+    return height > 0 && height <= maxHeight;
+  });
+  // Sources are sorted best-first, so the first eligible one is the best fit.
+  return eligible[0] || sources[sources.length - 1] || null;
+};
+
 // Turn a 3-letter subtitle code ("eng") into a readable language name.
 function languageLabel(code) {
   if (!code) return "Unknown";
@@ -95,6 +129,75 @@ function languageLabel(code) {
 const PROGRESS_WRITE_INTERVAL = 15000;
 // Don't bother seeking for the first few seconds of a title.
 const MIN_RESUME_SECONDS = 5;
+
+// `?debug=1` overlay: shows what the TV is actually doing (engine, resolution,
+// dropped frames, buffer, measured UI fps).
+const DebugHud = ({ videoRef }) => {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    let frames = 0;
+    let last = performance.now();
+    let raf = 0;
+
+    const countFrame = () => {
+      frames += 1;
+      raf = requestAnimationFrame(countFrame);
+    };
+    raf = requestAnimationFrame(countFrame);
+
+    const timer = setInterval(() => {
+      const video = videoRef.current;
+      const now = performance.now();
+      const fps = Math.round((frames * 1000) / Math.max(now - last, 1));
+      frames = 0;
+      last = now;
+
+      const quality =
+        video && typeof video.getVideoPlaybackQuality === "function"
+          ? video.getVideoPlaybackQuality()
+          : null;
+      const hls = video?.hls;
+      const level = hls && hls.currentLevel >= 0 ? hls.levels[hls.currentLevel] : null;
+      const bufferEnd =
+        video && video.buffered.length
+          ? video.buffered.end(video.buffered.length - 1)
+          : 0;
+
+      setStats({
+        build: PLAYER_BUILD,
+        engine: hls ? "hls.js" : "native",
+        fps,
+        resolution: video ? `${video.videoWidth}x${video.videoHeight}` : "-",
+        dropped: quality
+          ? `${quality.droppedVideoFrames}/${quality.totalVideoFrames}`
+          : "-",
+        buffer: video ? `${Math.max(bufferEnd - video.currentTime, 0).toFixed(1)}s` : "-",
+        ready: video ? video.readyState : "-",
+        level: level?.height ? `${level.height}p` : "auto",
+        estimate: hls ? `${Math.round(hls.bandwidthEstimate / 1000)} kbps` : "-",
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [videoRef]);
+
+  return (
+    <div className="player-debug">
+      {stats
+        ? Object.entries(stats).map(([key, value]) => (
+            <div key={key}>
+              <span>{key}</span>
+              {String(value)}
+            </div>
+          ))
+        : "collecting…"}
+    </div>
+  );
+};
 
 const PlayMovie = () => {
   const location = useLocation();
@@ -462,6 +565,20 @@ const PlayMovie = () => {
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        // Same cap for master playlists: pick the highest level that fits.
+        if (QUALITY_LOCK) {
+          let chosen = -1;
+          let best = 0;
+          (hls.levels || []).forEach((level, index) => {
+            const height = level.height || 0;
+            if (height && height <= QUALITY_LOCK && height > best) {
+              best = height;
+              chosen = index;
+            }
+          });
+          if (chosen >= 0) hls.currentLevel = chosen;
+        }
+
         resumeFrom();
         tryPlay();
       });
@@ -676,13 +793,13 @@ const PlayMovie = () => {
       const data = await res.json();
       console.log("[DirectStream] API response data:", data);
       if (data.success && data.m3u8Url) {
-        setDirectStreamUrl(data.m3u8Url);
+        // `?quality=720` pins playback to the best source at or below 720p.
+        const locked = pickSourceAtMost(data.sources, QUALITY_LOCK);
+        setDirectStreamUrl(locked?.url || data.m3u8Url);
         // Store all available sources for quality selection
         if (data.sources && data.sources.length > 0) {
           setAvailableSources(data.sources);
-          // Set initial quality
-          const initialSource = data.sources[0];
-          setCurrentQuality(initialSource.quality || "Auto");
+          setCurrentQuality(locked?.quality || data.sources[0].quality || "Auto");
         }
         setAllSubtitles(Array.isArray(data.subtitles) ? data.subtitles : []);
         setActiveSubtitleIndex(-1);
@@ -732,9 +849,9 @@ const PlayMovie = () => {
               <video
                 ref={playerRef}
                 slot="media"
-                style={{ width: "100%", height: "100%" }}
+                className="player-video"
                 crossOrigin="anonymous"
-                preload="auto"
+                preload="metadata"
               >
                 {subtitleTracks.map((subtitle) => (
                   <track
@@ -757,6 +874,8 @@ const PlayMovie = () => {
                 <MediaFullscreenButton />
               </MediaControlBar>
             </MediaController>
+
+            {DEBUG && <DebugHud videoRef={playerRef} />}
 
             {resumedAt > 0 && (
               <div className="resume-badge">

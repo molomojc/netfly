@@ -277,3 +277,17 @@
         }
     }
 }
+
+.is-tv-device .Poster,
+.is-tv-device .Poster:hover {
+    transform: none !important;
+    transition: none !important;
+}
+
+.is-tv-device .Poster::after {
+    transition: none !important;
+}
+
+.is-tv-device .Poster__info {
+    transition: opacity 0.12s linear, transform 0.12s linear;
+}

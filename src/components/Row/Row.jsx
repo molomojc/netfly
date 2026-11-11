@@ -2,8 +2,8 @@ import "./row.scss";
 import RowPoster from "../RowPoster/RowPoster";
 import SkeletonElement from "../SkeletonElement/SkeletonElement";
 import SkeletonPoster from "../SkeletonPoster/SkeletonPoster";
-import { useSelector } from "react-redux";
-import { useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useViewport from "../../hooks/useViewport";
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
@@ -17,11 +17,46 @@ import 'swiper/components/navigation/navigation.scss';
 import 'swiper/components/pagination/pagination.scss';
 SwiperCore.use([Navigation, Pagination]);
 
-const Row = ({ selector, title, genre, isLarge }) => {
+const Row = ({ selector, title, genre, isLarge, thunk, url }) => {
 	const { width } = useViewport();
+	const dispatch = useDispatch();
 	const rowData = useSelector(selector);
 	const { loading, error, data: results } = rowData;
 	const { pathname } = useLocation();
+	const rowRef = useRef(null);
+	const loadRequestedRef = useRef(false);
+
+	useEffect(() => {
+		if (!thunk || loading || (results && results.length > 0)) {
+			if (thunk && (loading || (results && results.length > 0))) {
+				loadRequestedRef.current = true;
+			}
+			return undefined;
+		}
+
+		const row = rowRef.current;
+		if (!row) return undefined;
+
+		const loadRow = () => {
+			if (loadRequestedRef.current) return;
+			loadRequestedRef.current = true;
+			dispatch(thunk(url, true));
+		};
+
+		if (typeof IntersectionObserver === "undefined") {
+			loadRow();
+			return undefined;
+		}
+
+		const observer = new IntersectionObserver((entries) => {
+			if (entries.some((entry) => entry.isIntersecting)) {
+				observer.disconnect();
+				loadRow();
+			}
+		}, { rootMargin: "600px 0px" });
+		observer.observe(row);
+		return () => observer.disconnect();
+	}, [dispatch, thunk, url, loading, results]);
 
 	//Custom Swiper config
 	const navigationPrevRef = useRef(null);
@@ -79,7 +114,7 @@ const Row = ({ selector, title, genre, isLarge }) => {
 	}
 
 	return (
-		<div className="Row">
+			<div className="Row" ref={rowRef}>
 			{error && <div className='Row__not-loaded'>Oops, an error occurred.</div>}
 			{loading ?
 				(
