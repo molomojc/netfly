@@ -1,0 +1,15 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/static/*",
+      "/*.{js,css,map,png,jpg,jpeg,gif,svg,ico,webp,woff,woff2,json,txt,webmanifest}",
+      "/manifest.json",
+      "/robots.txt"
+    ]
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".webmanifest": "application/manifest+json"
+  }
+}

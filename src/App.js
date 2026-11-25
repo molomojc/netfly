@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { useSelector } from "react-redux";
 import { Route, Switch, Redirect, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar/Navbar";
@@ -16,11 +15,9 @@ import PlayAnimation from "./components/PlayAnimation/PlayAnimation";
 import SportsAnimation from "./components/SportsAnimation/SportsAnimation";
 import Sports from "./pages/Sports/Sports";
 import PlaySports from "./components/PlaySports/PlaySports";
-import { selectSearchResults } from "./redux/search/search.selectors";
 import "./App.css";
 
 const PlayMovie = lazy(() => import("./components/PlayMovie/PlayMovie"));
-
 const getAnimationKey = (pathname) => {
   if (pathname === "/play" || pathname === "/PlayMovie") return "player";
   if (pathname === "/playSport" || pathname === "/PlaySports") return "player-sport";
@@ -28,9 +25,7 @@ const getAnimationKey = (pathname) => {
 };
 
 const App = () => {
-  const searchResults = useSelector(selectSearchResults);
   const location = useLocation();
-
   return (
     <div className="App">
       <Navbar />
@@ -45,14 +40,26 @@ const App = () => {
               <Redirect to="/browse" />
             </Route>
             <Route path="/splash" component={SplashAnimation} />
-            <Route path="/play" component={PlayAnimation} />
-            <Route path="/PlayMovie" component={PlayMovie} />
-            <Route path="/playSport" component={SportsAnimation} />
-            <Route path="/PlaySports" component={PlaySports} />
+            {/* Player routes carry their payload in router state. A refresh or a
+                shared link has none, so send the viewer somewhere real instead
+                of mounting an empty player. */}
             <Route
-              path="/search"
-              render={() => (searchResults ? <Search results={searchResults} /> : <Redirect to="/browse" />)}
+              path="/play"
+              render={() => (location.state?.id ? <PlayAnimation /> : <Redirect to="/browse" />)}
             />
+            <Route
+              path="/PlayMovie"
+              render={() => (location.state?.id ? <PlayMovie /> : <Redirect to="/browse" />)}
+            />
+            <Route
+              path="/playSport"
+              render={() => (location.state?.streamId ? <SportsAnimation /> : <Redirect to="/browse" />)}
+            />
+            <Route
+              path="/PlaySports"
+              render={() => (location.state?.streamId ? <PlaySports /> : <Redirect to="/browse" />)}
+            />
+            <Route path="/search" component={Search} />
             <Route exact path="/browse" component={Homepage} />
             <Route exact path="/browse/:categoryName" component={Category} />
             <Route exact path="/tvseries" component={TVSeries} />

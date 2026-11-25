@@ -11,3 +11,8 @@ export const selectSearchInputValue = createSelector(
 	[selectSearch],
 	search => search.inputValue
 );
+
+export const selectSearchLoadingState = createSelector(
+	[selectSearch],
+	search => search.isLoading
+);

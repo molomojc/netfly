@@ -1,0 +1,5 @@
+# SPA fallback for Netlify-style hosts: unknown paths serve index.html and
+# React Router takes over from there (deep links, refreshes, TV back button).
+# Real files on disk are always served first, so hashed /static assets and
+# /manifest.json are untouched.
+/*    /index.html   200
